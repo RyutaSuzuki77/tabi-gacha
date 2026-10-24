@@ -5,6 +5,7 @@ import { useGame } from './state/useGame'
 import { CardDetail } from './features/card/CardDetail'
 import { CollectionScreen } from './features/collection/CollectionScreen'
 import { HomeScreen } from './features/gacha/HomeScreen'
+import { ProfileScreen } from './features/profile/ProfileScreen'
 import { Layout } from './ui/Layout'
 import { TabBar, type TabId } from './ui/TabBar'
 
@@ -75,7 +76,9 @@ export default function App() {
                   onSelect={setSelectedPull}
                 />
               )}
-              {tab === 'profile' && <p className="text-stone-400">プロフィール（Task 15）</p>}
+              {tab === 'profile' && (
+                <ProfileScreen total={game.total} pullCount={game.pulls.length} demoPanel={null} />
+              )}
             </>
           )
         )}
