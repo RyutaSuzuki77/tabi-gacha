@@ -24,6 +24,7 @@
 - **ミッションは1回の抽選につき3枚**：固有1枚（固定枠）＋汎用2枚（抽選）。固有を抽選対象に混ぜてはならない（仕様 5.1）
 - **ガチャは1日1回・引き直し不可。** ただしデモモードで解除できる（仕様 4.5 / 12）
 - **`member_id`** を `profile` に持ち、`pulls` から参照する。`photos` には持たせない（仕様 10.1）
+- **出典表記は義務。** オープンデータの利用規約の条件であり、省略できない。表記は `src/data/sources.ts` の1か所にまとめ、プロフィール画面がそれを読む（仕様 11.5）
 - **実行時に外部APIを呼ばない。** Anthropic SDK を依存に追加しない。APIキーを扱うコードを書かない（仕様 11.2 / 15）
 - **サーバーサイド処理を書かない。** 完全な静的サイトとしてVercelにデプロイする（仕様 3 / 15）
 - **現在地の注釈に「端末の外に一切出ない」と書いてはならない。** 経路を開く際にGoogleマップのURLへ出発地として渡るため事実に反する（仕様 6.4）
@@ -104,6 +105,8 @@
 | ファイル | 責務 |
 |---|---|
 | `scripts/raw/` | 元のCSV（人口・座標）を置く。再現性のためコミットする |
+| `scripts/raw/README.md` | 使用したデータセット名・年次・取得元URL・取得日の記録 |
+| `src/data/sources.ts` | アプリ内に表示する出典表記（1か所にまとめる） |
 | `scripts/buildSkeleton.ts` | CSV → 骨格JSON の変換（純関数部分を分離してテストする） |
 | `scripts/skeleton.logic.ts` | 変換の純関数（都道府県→地方、人口パース、除外判定） |
 | `scripts/validateTowns.ts` | 生成済み町データの検証ロジック |
@@ -2391,6 +2394,60 @@ code,prefecture,name,population,lat,lng
 
 2つの出典をまたぐ場合は自治体コードで結合する。手で整えて構わない（この工程の再現性より、正しいデータが入っていることを優先する）。
 
+- [ ] **Step 1.5: 出典を記録する**
+
+`scripts/raw/README.md` を書く。**年次を必ず入れる**（検証スクリプトでは検出できない情報なので、ここが唯一の記録になる）：
+
+```markdown
+# 元データ
+
+## 人口・市区町村一覧
+- データセット名：（例）住民基本台帳に基づく人口、人口動態及び世帯数
+- 公表元：総務省
+- 年次：（例）2026年1月1日現在
+- 人口の区分：（例）日本人住民＋外国人住民の総数
+- 取得元URL：
+- 取得日：2026-10-24
+
+## 緯度経度
+- データセット名：（例）国土数値情報 市区町村役場等及び公的集会施設
+- 公表元：国土交通省
+- 測地系：（例）世界測地系（JGD2011）
+- 座標の形式：（例）十進度
+- 取得元URL：
+- 取得日：2026-10-24
+
+## 加工した内容
+- 自治体コードで2つのデータを結合
+- 人口10万人以上、名称が「区」で終わる行、人口100人未満の行を除外
+- 人口からレア度を機械的に付与
+```
+
+続けて `src/data/sources.ts` を作る。**アプリに表示する文面はここだけに持つ**：
+
+```ts
+export type DataSource = { label: string; publisher: string; url: string }
+
+/**
+ * アプリ内に表示する出典（仕様 11.5）。
+ * オープンデータの利用規約上、表記は義務。実際に使用したデータセットに合わせて書き換える。
+ */
+export const DATA_SOURCES: DataSource[] = [
+  {
+    label: '住民基本台帳に基づく人口、人口動態及び世帯数',
+    publisher: '総務省',
+    url: '',
+  },
+  {
+    label: '国土数値情報（市区町村役場等及び公的集会施設）',
+    publisher: '国土交通省',
+    url: '',
+  },
+]
+```
+
+> `url` は取得元のページURLを入れる。空のままにしない。
+
 - [ ] **Step 2: 骨格を生成する**
 
 ```bash
@@ -3722,6 +3779,7 @@ git commit -m "feat(collection): カード一覧と並べ替え（カード詳�
 ```tsx
 import type { ReactNode } from 'react'
 import { RANKS, rankFor } from '../../domain/rank'
+import { DATA_SOURCES } from '../../data/sources'
 import { isStorageAvailable } from '../../storage/schema'
 
 export function ProfileScreen({
@@ -3779,6 +3837,27 @@ export function ProfileScreen({
         )}
       </section>
 
+      {/* 出典表記。オープンデータの利用規約上の義務なので省略しない（仕様 11.5） */}
+      <section className="text-xs leading-relaxed text-stone-500">
+        <h3 className="mb-1 font-bold text-stone-600">データの出典</h3>
+        <p>この町のデータは、次の統計を加工して作成しています。</p>
+        <ul className="mt-1 space-y-0.5">
+          {DATA_SOURCES.map((source) => (
+            <li key={source.label}>
+              {source.publisher}「
+              {source.url ? (
+                <a href={source.url} target="_blank" rel="noreferrer" className="underline">
+                  {source.label}
+                </a>
+              ) : (
+                source.label
+              )}
+              」
+            </li>
+          ))}
+        </ul>
+      </section>
+
       {demoPanel}
     </div>
   )
@@ -3802,6 +3881,7 @@ export function ProfileScreen({
 3. 称号の一覧で現在の称号が太字になっている
 4. データ保存と現在地の注釈が両方出ている
 5. 注釈に「端末の外に一切出ない」という表現が**無い**ことを目で確認する（仕様 6.4）
+6. 「データの出典」が出ており、**各データセットのURLがリンクになっている**（`url` が空だとリンクにならないので、空のまま残っていないかの確認も兼ねる）
 
 - [ ] **Step 4: Commit**
 
@@ -4579,6 +4659,7 @@ git commit -m "chore: Vercelへデプロイ"
 | 10 データモデル | Task 2、Task 7 |
 | 10.1 `member_id` | Task 7、Task 11 |
 | 11.1〜11.3 データ源と生成 | Task 8、9、10 |
+| 11.5 出典の表記 | Task 10 Step 1.5（記録と定数）、Task 15（プロフィール画面に表示） |
 | 12 デモモード | Task 17 |
 | 13 壊れ方の設計 | Task 7（localStorage・スキーマ版）、Task 13（現在地）、Task 16（IndexedDB） |
 | 14 テスト方針 | 全タスク（UIは手動確認に限定） |
