@@ -60,6 +60,10 @@ describe('validateTowns', () => {
     expect(fieldsOf(validateTowns([town({ name: '千代田区' })], GENERICS))).toContain('name')
   })
 
+  it('郡の集計行を検出する', () => {
+    expect(fieldsOf(validateTowns([town({ name: '鹿角郡' })], GENERICS))).toContain('name')
+  })
+
   it('人口が小さすぎる行を検出する', () => {
     expect(fieldsOf(validateTowns([town({ population: 0, rarity: 'SSR' })], GENERICS))).toContain('population')
   })

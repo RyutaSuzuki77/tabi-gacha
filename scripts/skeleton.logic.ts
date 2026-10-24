@@ -26,12 +26,17 @@ export function regionForPrefecture(prefecture: string): Region | null {
 export const MIN_POPULATION = 100
 
 /**
- * 出題対象から外す名称か。
- * 市町村で「区」で終わるのは特別区（東京23区）と政令市の行政区だけなので、
- * この条件だけで両方を確実に落とせる（仕様 4.1）。
+ * 出題対象から外す名称か（仕様 4.1）。
+ *
+ * - 「区」で終わる: 特別区（東京23区）と政令市の行政区。市町村で「区」で終わるのは
+ *   この2種類だけなので、この条件で両方を確実に落とせる
+ * - 「郡」で終わる: e-Stat のデータに含まれる**郡ごとの集計行**。自治体ではない
+ *   （例: 秋田県鹿角郡 4,297人 = 構成町村の合計）。実在の自治体名が「郡」で
+ *   終わることはなく、郡を含む自治体は「紋別郡西興部村」のように町村名で終わる
  */
 export function isExcludedName(name: string): boolean {
-  return name.trim().endsWith('区')
+  const trimmed = name.trim()
+  return trimmed.endsWith('区') || trimmed.endsWith('郡')
 }
 
 export function parsePopulation(raw: string): number | null {

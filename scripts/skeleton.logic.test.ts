@@ -131,6 +131,21 @@ describe('buildSkeletonTown', () => {
     expect(buildSkeletonTown({ ...row, population: '100' })).not.toBeNull()
   })
 
+  it('郡の集計行（名称が「郡」で終わる）は除外する', () => {
+    // e-Stat のデータには郡ごとの集計行が含まれる（例: 秋田県鹿角郡 4,297人 =
+    // 構成町村の合計）。自治体ではないので出題対象にしてはならない
+    expect(buildSkeletonTown({
+      code: '05300', prefecture: '秋田県', name: '鹿角郡', population: '4,297',
+    })).toBeNull()
+    expect(buildSkeletonTown({
+      code: '33580', prefecture: '岡山県', name: '真庭郡', population: '755',
+    })).toBeNull()
+  })
+
+  it('郡を含む自治体名は除外しない', () => {
+    expect(buildSkeletonTown({ ...row, name: '紋別郡西興部村' })).not.toBeNull()
+  })
+
   it('人口・都道府県が読めない行は null', () => {
     expect(buildSkeletonTown({ ...row, population: '不明' })).toBeNull()
     expect(buildSkeletonTown({ ...row, prefecture: '架空県' })).toBeNull()

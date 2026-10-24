@@ -37,6 +37,7 @@ export function validateTowns(towns: unknown, genericMissions: GenericMission[])
 
     if (typeof town?.name !== 'string' || town.name === '') push('name', '町名が空')
     else if (town.name.endsWith('区')) push('name', `特別区・行政区は出題対象外: ${town.name}`)
+    else if (town.name.endsWith('郡')) push('name', `郡の集計行は自治体ではない: ${town.name}`)
     if (typeof town?.prefecture !== 'string' || town.prefecture === '') push('prefecture', '都道府県が空')
     if (!REGIONS.includes(town?.region as Region)) push('region', `地方が不正: ${String(town?.region)}`)
 
