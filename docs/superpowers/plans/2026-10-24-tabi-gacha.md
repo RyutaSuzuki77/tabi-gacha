@@ -344,7 +344,7 @@ git commit -m "feat: Vite + React + TS + Tailwind の土台とタブ骨格"
   - `type Rarity = 'SSR' | 'SR' | 'R' | 'N'`
   - `type Region = '北海道' | '東北' | '関東' | '中部' | '近畿' | '中国' | '四国' | '九州沖縄'`
   - `const REGIONS: readonly Region[]`（8件、仕様の順）
-  - `interface Town { id: string; name: string; prefecture: string; region: Region; population: number; rarity: Rarity; lat: number; lng: number; tags: string[]; uniqueMission: string; accessTips: string; enriched: boolean }`
+  - `interface Town { id: string; name: string; prefecture: string; region: Region; population: number; rarity: Rarity; tags: string[]; uniqueMission: string; accessTips: string; enriched: boolean }`
   - `interface GenericMission { id: string; text: string; requiredTags: string[] }`
   - `interface PulledMission { kind: 'unique' | 'generic'; genericMissionId: string | null; done: boolean }`
   - `interface Pull { id: string; memberId: string; townId: string; pulledAt: string; missions: PulledMission[]; }`
@@ -430,8 +430,6 @@ export interface Town {
   region: Region
   population: number
   rarity: Rarity
-  lat: number
-  lng: number
   tags: string[]
   uniqueMission: string
   accessTips: string
@@ -546,7 +544,7 @@ import type { Town } from './types'
 function town(over: Partial<Town>): Town {
   return {
     id: 't', name: '某町', prefecture: '島根県', region: '中国',
-    population: 5000, rarity: 'SR', lat: 35, lng: 135,
+    population: 5000, rarity: 'SR',
     tags: [], uniqueMission: 'm', accessTips: 'a', enriched: true,
     ...over,
   }
@@ -661,7 +659,7 @@ function seq(values: number[]): Rng {
 function town(id: string, rarity: Rarity): Town {
   return {
     id, name: `${id}町`, prefecture: '島根県', region: '中国',
-    population: 5000, rarity, lat: 35, lng: 135,
+    population: 5000, rarity,
     tags: [], uniqueMission: 'm', accessTips: 'a', enriched: true,
   }
 }
@@ -969,7 +967,7 @@ git commit -m "feat(domain): 汎用ミッションの成立条件フィルタと
   - `type Rank = { threshold: number; title: string }`、`const RANKS: readonly Rank[]`、`rankFor(total: number): Rank`
   - `canDraw(lastDrawnAt: string | null, now: Date, unlimited: boolean): boolean`
   - `type Origin = { kind: 'coords'; lat: number; lng: number } | { kind: 'text'; value: string } | null`
-  - `routeUrl(destination: { lat: number; lng: number }, origin: Origin): string`
+  - `routeUrl(destination: string, origin: Origin): string`（`destination` は「都道府県名＋市区町村名」）
 
 **設計上の注記（仕様からの意図的なずれ）:** 仕様10の `profile` は「累計ポイント」を持つが、実装では**保存せず `pulls` から導出する**。真実の源を `pulls` 1か所にすることで、達成チェックを外したときの整合ずれが構造的に起きなくなる。将来DBに移すとき、`members` 側にキャッシュ列を足すのは後からでも安全にできる。
 
@@ -995,7 +993,7 @@ function missions(doneFlags: boolean[]): PulledMission[] {
 function town(id: string, rarity: Town['rarity']): Town {
   return {
     id, name: `${id}町`, prefecture: '島根県', region: '中国',
-    population: 5000, rarity, lat: 35, lng: 135,
+    population: 5000, rarity,
     tags: [], uniqueMission: 'm', accessTips: 'a', enriched: true,
   }
 }
@@ -1112,15 +1110,24 @@ describe('canDraw', () => {
 import { describe, expect, it } from 'vitest'
 import { routeUrl } from './routeUrl'
 
-const dest = { lat: 35.1234, lng: 132.5678 }
+const dest = '島根県奥出雲町'
 
 describe('routeUrl', () => {
-  it('目的地は座標で渡し、公共交通を指定する', () => {
+  it('目的地は「都道府県名＋市区町村名」で渡し、公共交通を指定する', () => {
     const url = new URL(routeUrl(dest, null))
     expect(url.origin + url.pathname).toBe('https://www.google.com/maps/dir/')
     expect(url.searchParams.get('api')).toBe('1')
-    expect(url.searchParams.get('destination')).toBe('35.1234,132.5678')
+    expect(url.searchParams.get('destination')).toBe('島根県奥出雲町')
     expect(url.searchParams.get('travelmode')).toBe('transit')
+  })
+
+  it('目的地の日本語をエンコードする', () => {
+    expect(routeUrl(dest, null)).toContain('destination=%E5%B3%B6%E6%A0%B9%E7%9C%8C')
+  })
+
+  it('都道府県名を前置するので同名の市町村が区別できる', () => {
+    expect(new URL(routeUrl('東京都府中市', null)).searchParams.get('destination')).toBe('東京都府中市')
+    expect(new URL(routeUrl('広島県府中市', null)).searchParams.get('destination')).toBe('広島県府中市')
   })
 
   it('出発地が無ければ origin を付けない', () => {
@@ -1242,11 +1249,16 @@ export type Origin =
 /**
  * Googleマップの経路URLを組み立てる（仕様 6.1）。
  * APIキーは不要。所要時間や経路の算出はGoogleマップ側に委譲する。
+ *
+ * 目的地は緯度経度ではなく「都道府県名＋市区町村名」のテキストで渡す。
+ * Maps URLs は地名を受け付けるため座標が不要になり、測地系のズレや代表点の
+ * 選び方の問題を抱えずに済む（仕様 6.1）。都道府県名を前置すれば同名の市町村も
+ * 一意に定まる。
  */
-export function routeUrl(destination: { lat: number; lng: number }, origin: Origin): string {
+export function routeUrl(destination: string, origin: Origin): string {
   const params = new URLSearchParams({
     api: '1',
-    destination: `${destination.lat},${destination.lng}`,
+    destination,
     travelmode: 'transit',
   })
 
@@ -1672,12 +1684,14 @@ git commit -m "feat(storage): profile と pulls の永続化層（member_id・�
   - `parseCsv(text: string): Record<string, string>[]`
   - `isExcludedName(name: string): boolean`
   - `const MIN_POPULATION = 100`
-  - `buildSkeletonTown(row: { code: string; prefecture: string; name: string; population: string; lat: string; lng: string }): Town | null`
+  - `buildSkeletonTown(row: { code: string; prefecture: string; name: string; population: string }): Town | null`
   - `curate(towns: Town[], perRegionPerRarity: number, rng: Rng): Town[]`
 
 **入力データの前提:** `scripts/raw/towns.csv` に、ヘッダ付きで次の列を持つCSVを置く。列名は正確に一致させる。
-`code,prefecture,name,population,lat,lng`
-総務省やe-Statから落としたCSVの列名が異なる場合は、`buildSkeleton.ts` の中で列名を読み替える処理を足す（純ロジックは変更しない）。
+`code,prefecture,name,population`
+e-Statから落としたファイルの列名が異なる場合は、`buildSkeleton.ts` の中で列名を読み替える処理を足す（純ロジックは変更しない）。
+
+**座標の列は不要。** 目的地はGoogleマップに地名で渡すため（仕様 6.1）、落とすデータセットは人口の1つだけで足りる。
 
 - [ ] **Step 1: 失敗するテストを書く**
 
@@ -1767,7 +1781,7 @@ describe('parseCsv', () => {
 describe('buildSkeletonTown', () => {
   const row = {
     code: '32386', prefecture: '島根県', name: '奥出雲町',
-    population: '11,500', lat: '35.1833', lng: '132.9000',
+    population: '11,500',
   }
 
   it('骨格を組み立てる。未生成なので enriched は false', () => {
@@ -1779,8 +1793,6 @@ describe('buildSkeletonTown', () => {
       region: '中国',
       population: 11500,
       rarity: 'R',
-      lat: 35.1833,
-      lng: 132.9,
       tags: [],
       uniqueMission: '',
       accessTips: '',
@@ -1813,9 +1825,8 @@ describe('buildSkeletonTown', () => {
     expect(buildSkeletonTown({ ...row, population: '100' })).not.toBeNull()
   })
 
-  it('人口・座標・都道府県が読めない行は null', () => {
+  it('人口・都道府県が読めない行は null', () => {
     expect(buildSkeletonTown({ ...row, population: '不明' })).toBeNull()
-    expect(buildSkeletonTown({ ...row, lat: '' })).toBeNull()
     expect(buildSkeletonTown({ ...row, prefecture: '架空県' })).toBeNull()
   })
 })
@@ -1824,7 +1835,7 @@ describe('curate', () => {
   function town(id: string, region: Town['region'], rarity: Rarity): Town {
     return {
       id, name: `${id}町`, prefecture: 'X県', region,
-      population: 5000, rarity, lat: 35, lng: 135,
+      population: 5000, rarity,
       tags: [], uniqueMission: '', accessTips: '', enriched: false,
     }
   }
@@ -1927,8 +1938,6 @@ export function buildSkeletonTown(row: {
   prefecture: string
   name: string
   population: string
-  lat: string
-  lng: string
 }): Town | null {
   const region = regionForPrefecture(row.prefecture)
   if (!region) return null
@@ -1942,10 +1951,6 @@ export function buildSkeletonTown(row: {
   const rarity = rarityForPopulation(population)
   if (!rarity) return null // 人口10万人以上は出題対象外
 
-  const lat = Number(row.lat)
-  const lng = Number(row.lng)
-  if (!Number.isFinite(lat) || !Number.isFinite(lng) || row.lat === '' || row.lng === '') return null
-
   return {
     id: row.code.trim(),
     name: row.name.trim(),
@@ -1953,8 +1958,6 @@ export function buildSkeletonTown(row: {
     region,
     population,
     rarity,
-    lat,
-    lng,
     tags: [],
     uniqueMission: '',
     accessTips: '',
@@ -1997,7 +2000,7 @@ function shuffle<T>(items: T[], rng: Rng): T[] {
  * scripts/raw/towns.csv から骨格の towns.json を作る。
  * 使い方: npx tsx scripts/buildSkeleton.ts [1地方1レア度あたりの件数]
  *
- * 列名は code,prefecture,name,population,lat,lng を前提にしている。
+ * 列名は code,prefecture,name,population を前提にしている。
  * 落としてきたCSVの列名が違う場合は、下の normalizeRow を直す。
  */
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -2012,8 +2015,6 @@ function normalizeRow(row: Record<string, string>) {
     prefecture: row.prefecture,
     name: row.name,
     population: row.population,
-    lat: row.lat,
-    lng: row.lng,
   }
 }
 
@@ -2110,8 +2111,6 @@ function town(over: Partial<Town> = {}): Town {
     region: '中国',
     population: 11500,
     rarity: 'R',
-    lat: 35.1833,
-    lng: 132.9,
     tags: ['山間'],
     uniqueMission: 'たたら製鉄の跡をひとつ訪ねて、鉄と水の関係を確かめる',
     accessTips: '最寄りは木次駅だが町域は広く、駅から先はバスの本数が少ない。車での移動が無難で、冬は積雪に備えたい。',
@@ -2164,10 +2163,6 @@ describe('validateTowns', () => {
 
   it('人口とレア度の不整合を検出する', () => {
     expect(fieldsOf(validateTowns([town({ population: 2000 })], GENERICS))).toContain('rarity')
-  })
-
-  it('日本の範囲外の座標を検出する', () => {
-    expect(fieldsOf(validateTowns([town({ lat: 0, lng: 0 })], GENERICS))).toContain('lat')
   })
 
   it('固有ミッションが短すぎる／長すぎる場合を検出する', () => {
@@ -2243,8 +2238,6 @@ const TOO_GENERIC = [
   'おすすめを聞く',
 ]
 
-const JAPAN_BOUNDS = { minLat: 20, maxLat: 46, minLng: 122, maxLng: 154 }
-
 export function validateTowns(towns: unknown, genericMissions: GenericMission[]): ValidationError[] {
   if (!Array.isArray(towns)) {
     return [{ townId: '-', field: 'root', message: 'towns.json の中身が配列ではない' }]
@@ -2275,13 +2268,6 @@ export function validateTowns(towns: unknown, genericMissions: GenericMission[])
       push('population', `人口が小さすぎる（実在しない自治体の可能性）: ${town.population}`)
     } else if (rarityForPopulation(town.population) !== town.rarity) {
       push('rarity', `人口 ${town.population} に対してレア度 ${town.rarity} が不整合`)
-    }
-
-    if (typeof town?.lat !== 'number' || town.lat < JAPAN_BOUNDS.minLat || town.lat > JAPAN_BOUNDS.maxLat) {
-      push('lat', `緯度が日本の範囲外: ${String(town?.lat)}`)
-    }
-    if (typeof town?.lng !== 'number' || town.lng < JAPAN_BOUNDS.minLng || town.lng > JAPAN_BOUNDS.maxLng) {
-      push('lng', `経度が日本の範囲外: ${String(town?.lng)}`)
     }
 
     if (!Array.isArray(town?.tags)) {
@@ -2385,26 +2371,38 @@ git commit -m "feat(scripts): 町データの検証（タグ語彙・レア度�
 
 **このタスクは手作業が主体で、自動テストは Task 9 の `scripts/data.test.ts` が担う。**
 
-> **Step 1〜3 は必ずひと続きで行う。** いずれもデータ配布サイトを開いている間の作業であり、ライセンス表示と出典表記の形式はダウンロードボタンと同じページに書かれている。**ブラウザのタブを閉じる前に Step 3 まで終わらせる。** 閉じてしまうと、該当ページを探し直すことになる。
+> **Step 1〜3 は必ずひと続きで行う。** いずれもe-Statを開いている間の作業であり、ライセンス表示と出典表記の形式はダウンロードボタンと同じページに書かれている。**ブラウザのタブを閉じる前に Step 3 まで終わらせる。** 閉じてしまうと、該当ページを探し直すことになる。
 >
 > また、ライセンス次第で**落とすデータセット自体を変える**必要が出るため（非商用表示、申請が必要、など）、Step 2 はダウンロードより先か同時に行う。後から確認すると作業が巻き戻る。
 
-- [ ] **Step 1: 人口と座標のCSVを用意する**
+- [ ] **Step 1: 市区町村別人口のデータを用意する**
 
-総務省「住民基本台帳に基づく人口」またはe-Statの市区町村別人口、および国土数値情報の市区町村役場等位置データから、次の列を持つCSVを `scripts/raw/towns.csv` として作る。
+**落とすファイルは1つだけ。** 座標は不要（目的地はGoogleマップに地名で渡すため。仕様 6.1）。
+
+e-Stat の「住民基本台帳に基づく人口、人口動態及び世帯数調査」から、**市区町村別**の最新年のファイルを落とす。
+
+- 一覧ページ：<https://www.e-stat.go.jp/stat-search/files?toukei=00200241&tstat=000001039591>
+- 最新年を選び、地域区分が「市区町村」のファイルを選ぶ
+- **提供形式はExcelのみ**（CSVは用意されていない）。落としたExcelを開き、「CSV UTF-8」で保存し直す
+
+保存し直したCSVを、次の4列に整えて `scripts/raw/towns.csv` とする。列名はこの通りにする。
 
 ```
-code,prefecture,name,population,lat,lng
-32386,島根県,奥出雲町,11500,35.1833,132.9000
+code,prefecture,name,population
+32386,島根県,奥出雲町,11500
 ```
 
-2つの出典をまたぐ場合は自治体コードで結合する。手で整えて構わない（この工程の再現性より、正しいデータが入っていることを優先する）。
+手で整えて構わない（この工程の再現性より、正しいデータが入っていることを優先する）。整えるときの注意：
+
+- **`code` は文字列として扱う。** Excelで開くと `01101` が `1101` になる。先頭のゼロを保つこと
+- **`code` は5桁に揃える。** 6桁（末尾が検査数字）で提供されている場合は末尾を落とす
+- **人口は1つの区分に統一する。** 「日本人住民」と「総数」を混在させない
 
 - [ ] **Step 2: ダウンロードするデータセットのライセンスを個別に確認する**
 
-**この確認だけは機械化できない。** 国土数値情報はデータセットごとにライセンスが異なり、「オープンデータ（CC BY 4.0）一部制限」「商用可／非商用」などの個別表示があるものや、測量法に基づく承認が必要なものが存在する。
+**この確認だけは機械化できない。** 政府のオープンデータはデータセットごとにライセンスが異なる。「オープンデータ（CC BY 4.0）」「商用可／非商用」などの個別表示があるものや、測量法に基づく承認が必要なものが存在する（実例：国土数値情報の市区町村役場データは `P05` が CC BY 4.0 だが、`P34` は非商用のみ）。
 
-落とす各データセットのページで次を確認し、`scripts/raw/README.md` に書き写す：
+落とすデータセットのページで次を確認し、`scripts/raw/README.md` に書き写す：
 
 1. ライセンスの表示（PDL1.0 / CC BY 4.0 / 商用可 / 非商用 のいずれか）
 2. 求められている**出典表記の形式**（そのまま転記する）
@@ -2413,7 +2411,7 @@ code,prefecture,name,population,lat,lng
 
 求められている形式が計画の文面と違っていた場合は、**規約側の形式に合わせる**（`src/data/sources.ts` を直す）。
 
-**迷ったら PDL1.0 か CC BY 4.0 のデータセットを選ぶ。** 「非商用」表示のものや申請が必要なものは、公開URLで配るこのアプリでは判断が面倒になるため、最初から避けるのが早い。同種のデータが複数の形式で提供されていることが多く、乗り換えのコストは低い。
+**迷ったら CC BY 4.0 か政府標準利用規約のデータセットを選ぶ。** 「非商用」表示のものや申請が必要なものは、公開URLで配るこのアプリでは判断が面倒になるため、最初から避けるのが早い。同種のデータが複数提供されていることが多く、乗り換えのコストは低い。
 
 - [ ] **Step 3: 出典を記録する**
 
@@ -2430,24 +2428,19 @@ code,prefecture,name,population,lat,lng
 - 取得元URL：
 - 取得日：2026-10-24
 
-## 緯度経度
-- データセット名：（例）国土数値情報 市区町村役場等及び公的集会施設
-- 公表元：国土交通省
-- 測地系：（例）世界測地系（JGD2011）
-- 座標の形式：（例）十進度
-- 取得元URL：
-- 取得日：2026-10-24
-
 ## ライセンス
-- 人口データ：（例）政府標準利用規約（第2.0版）／CC BY 4.0 互換
-- 座標データ：（例）PDL1.0（改変の明記が必要）
+- （例）政府標準利用規約（第2.0版）／CC BY 4.0 互換
 - 求められている出典表記の形式：（規約ページから転記）
 - 申請・承認の要否：（例）不要
 
 ## 加工した内容
-- 自治体コードで2つのデータを結合
+- ExcelをCSV UTF-8 に変換し、code/prefecture/name/population の4列に整形
 - 人口10万人以上、名称が「区」で終わる行、人口100人未満の行を除外
 - 人口からレア度を機械的に付与
+
+## 座標を取得していない理由
+Googleマップの目的地は「都道府県名＋市区町村名」のテキストで指定しているため、
+緯度経度を持つ必要がない（仕様 6.1）。
 ```
 
 続けて `src/data/sources.ts` を作る。**アプリに表示する文面はここだけに持つ**：
@@ -2469,14 +2462,8 @@ export const DATA_SOURCES: DataSource[] = [
   {
     label: '政府統計の総合窓口（e-Stat）',
     publisher: '総務省',
-    url: '',
+    url: 'https://www.e-stat.go.jp/',
     noteModified: false,
-  },
-  {
-    label: '国土数値情報（市区町村役場等及び公的集会施設）',
-    publisher: '国土交通省',
-    url: '',
-    noteModified: true,
   },
 ]
 
@@ -2622,7 +2609,7 @@ import type { GenericMission, Town } from './types'
 function town(id: string, rarity: Town['rarity'], tags: string[] = []): Town {
   return {
     id, name: `${id}町`, prefecture: '島根県', region: '中国',
-    population: 5000, rarity, lat: 35, lng: 135,
+    population: 5000, rarity,
     tags, uniqueMission: '固有ミッション', accessTips: 'コツ', enriched: true,
   }
 }
@@ -3096,7 +3083,7 @@ import type { GenericMission, PulledMission, Town } from './types'
 
 const town: Town = {
   id: 'a', name: '奥出雲町', prefecture: '島根県', region: '中国',
-  population: 11500, rarity: 'R', lat: 35, lng: 133,
+  population: 11500, rarity: 'R',
   tags: [], uniqueMission: 'たたら製鉄の跡をひとつ訪ねる', accessTips: 'コツ', enriched: true,
 }
 
@@ -3473,7 +3460,7 @@ export function AccessSection({
         {fakeOrigin && <p className="text-sm text-amber-700">デモモードの擬装座標を出発地にしています</p>}
 
         <a
-          href={routeUrl({ lat: town.lat, lng: town.lng }, origin)}
+          href={routeUrl(`${town.prefecture}${town.name}`, origin)}
           target="_blank"
           rel="noreferrer"
           className="block rounded-lg bg-stone-900 px-4 py-3 text-center text-white"
@@ -3544,7 +3531,7 @@ import type { Pull, Rarity, Region, Town } from './types'
 function town(id: string, rarity: Rarity, region: Region): Town {
   return {
     id, name: `${id}町`, prefecture: 'X県', region,
-    population: 5000, rarity, lat: 35, lng: 135,
+    population: 5000, rarity,
     tags: [], uniqueMission: 'm', accessTips: 'a', enriched: true,
   }
 }
@@ -3882,7 +3869,7 @@ export function ProfileScreen({
       {/* 出典表記。オープンデータの利用規約上の義務なので省略しない（仕様 11.5） */}
       <section className="text-xs leading-relaxed text-stone-500">
         <h3 className="mb-1 font-bold text-stone-600">データの出典</h3>
-        <p>町名・人口・位置のデータは、次の統計を加工して作成しています。</p>
+        <p>町名・人口のデータは、次の統計を加工して作成しています。</p>
         <ul className="mt-1 space-y-0.5">
           {DATA_SOURCES.map((source) => (
             <li key={source.label}>
@@ -4717,6 +4704,7 @@ git commit -m "chore: Vercelへデプロイ"
 
 - **累計ポイントを `profile` に保存しない**（Task 6）。`pulls` から毎回導出する。真実の源を1か所にして、達成チェックを外したときの整合ずれを構造的に防ぐため
 - **「候補が空のレア度で再抽選」を事前フィルタで実現**（Task 4）。事後の再抽選ループを避け、1回で決まる形にした
+- **町データに緯度経度を持たない**（Task 2・8・9）。目的地はGoogleマップに「都道府県名＋市区町村名」のテキストで渡す。座標の用途が目的地の指定だけだったため、座標データの取得・測地系の変換・代表点の選定がまとめて不要になった（仕様 6.1）
 
 **3. 型と名前の一貫性**
 
