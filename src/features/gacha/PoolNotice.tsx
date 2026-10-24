@@ -15,7 +15,7 @@ export function PoolNotice() {
     <section className="mt-6 border-t border-stone-200 pt-4 text-xs text-stone-500">
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-start justify-between gap-2 text-left"
+        className="flex w-full items-start justify-between gap-2 py-3 text-left"
       >
         <span>有名な街は入っていません ― 出るのは人口10万人未満の市町村だけ</span>
         <span className="shrink-0">{open ? '▴' : '▾'}</span>

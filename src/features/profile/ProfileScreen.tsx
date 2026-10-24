@@ -1,15 +1,16 @@
 import type { ReactNode } from 'react'
 import { RANKS, rankFor } from '../../domain/rank'
 import { AI_DISCLAIMER, DATA_SOURCES } from '../../data/sources'
-import { isStorageAvailable } from '../../storage/schema'
 
 export function ProfileScreen({
   total,
   pullCount,
+  storageWritable,
   demoPanel,
 }: {
   total: number
   pullCount: number
+  storageWritable: boolean
   demoPanel: ReactNode
 }) {
   const rank = rankFor(total)
@@ -51,9 +52,9 @@ export function ProfileScreen({
         <p>
           現在地は、行き方を調べるときの「出発地」として使います。このアプリにサーバーはないので、現在地がどこかに保存されることはありません。経路を開く操作をしたときだけ、出発地としてGoogleマップに渡されます。
         </p>
-        {!isStorageAvailable() && (
+        {!storageWritable && (
           <p className="font-bold text-amber-700">
-            このブラウザでは保存ができません。閉じると引いたカードは失われます。
+            いま保存ができません。プライベートブラウズか、端末の空き容量が足りない可能性があります。閉じると引いたカードは失われます。
           </p>
         )}
       </section>

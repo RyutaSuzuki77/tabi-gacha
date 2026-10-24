@@ -14,6 +14,8 @@ export function PhotoSection({ pullId }: { pullId: string }) {
   const [urls, setUrls] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const [showNotice, setShowNotice] = useState(false)
+  // 写真はこの端末にしかない。誤タップで消えないよう、削除は2段にする
+  const [confirmingId, setConfirmingId] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -53,6 +55,7 @@ export function PhotoSection({ pullId }: { pullId: string }) {
   }
 
   async function handleDelete(id: string) {
+    setConfirmingId(null)
     await deletePhoto(id)
     setPhotos(await listPhotos(pullId))
   }
@@ -61,7 +64,7 @@ export function PhotoSection({ pullId }: { pullId: string }) {
     <section className="border-t border-stone-200 pt-4">
       <div className="mb-2 flex items-center justify-between">
         <h3 className="text-sm font-bold">写真</h3>
-        <button onClick={handleAddClick} className="py-2 text-sm text-stone-500 underline">
+        <button onClick={handleAddClick} className="px-2 py-3 text-sm text-stone-500 underline">
           ＋追加
         </button>
       </div>
@@ -81,7 +84,7 @@ export function PhotoSection({ pullId }: { pullId: string }) {
       {showNotice && (
         <div className="mb-3 rounded-lg bg-stone-50 p-3 text-xs leading-relaxed text-stone-600">
           <p>写真はこの端末の中にだけ保存されます。大切な写真は端末のカメラロールにも残しておいてください。</p>
-          <button onClick={acceptNotice} className="mt-2 rounded bg-stone-900 px-3 py-2 text-white">
+          <button onClick={acceptNotice} className="mt-2 rounded bg-stone-900 px-4 py-3 text-white">
             わかった
           </button>
         </div>
@@ -100,12 +103,31 @@ export function PhotoSection({ pullId }: { pullId: string }) {
                 alt=""
                 className="aspect-square w-full rounded object-cover"
               />
-              <button
-                onClick={() => void handleDelete(photo.id)}
-                className="absolute right-1 top-1 rounded bg-black/60 px-2 py-1 text-xs text-white"
-              >
-                ×
-              </button>
+              {confirmingId === photo.id ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 rounded bg-black/70 p-1 text-center">
+                  <span className="text-[10px] text-white">消すと戻せません</span>
+                  <button
+                    onClick={() => void handleDelete(photo.id)}
+                    className="w-full rounded bg-red-600 px-2 py-2 text-xs text-white"
+                  >
+                    消す
+                  </button>
+                  <button
+                    onClick={() => setConfirmingId(null)}
+                    className="w-full rounded bg-white/90 px-2 py-2 text-xs"
+                  >
+                    やめる
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setConfirmingId(photo.id)}
+                  aria-label="この写真を削除する"
+                  className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-bl bg-black/50 text-white"
+                >
+                  ×
+                </button>
+              )}
             </div>
           ))}
         </div>

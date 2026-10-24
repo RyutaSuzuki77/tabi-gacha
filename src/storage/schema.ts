@@ -19,16 +19,20 @@ export const KEYS = {
 const memory = new Map<string, string>()
 
 function getItem(key: string): string | null {
+  // 退避先を先に見る。退避先にキーがあるということは、そのキーの最後の書き込みが
+  // 失敗した＝localStorage 側が古いということなので、localStorage を信じてはならない。
+  // 容量が尽きた環境では localStorage が「古い値」を返すため、後に見ると引いた直後の
+  // カードが巻き戻る。書き込みに成功した時点で退避先から消すので、正常な環境では
+  // 退避先は常に空であり、消されたデータが生き返ることもない。
+  const fallback = memory.get(key)
+  if (fallback !== undefined) return fallback
+
   try {
-    const value = localStorage.getItem(key)
-    if (value !== null) return value
+    return localStorage.getItem(key)
   } catch {
     // localStorage に触れない環境
+    return null
   }
-  // 書き込みに失敗したキーだけが退避先にある。
-  // 「書き込みは失敗するが読み取りは成功して空を返す」環境（Safari の
-  // プライベートモード等）では、ここを見ないと同一セッション内で読み戻せない。
-  return memory.get(key) ?? null
 }
 
 function setItem(key: string, value: string): boolean {

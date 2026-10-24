@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { validateTowns } from './validateTowns'
+import { validateGenericMissions, validateTowns } from './validateTowns'
 import { createPull } from '../src/domain/createPull'
 import { poolFor, type DrawMode } from '../src/domain/pool'
 import { REGIONS, type GenericMission, type Town } from '../src/domain/types'
@@ -16,10 +16,10 @@ describe('public/data の実データ', () => {
     expect(errors, JSON.stringify(errors.slice(0, 20), null, 2)).toEqual([])
   })
 
-  it.runIf(existsSync(GENERICS))('汎用プールに条件なしのミッションが3つ以上ある', () => {
-    const generics = JSON.parse(readFileSync(GENERICS, 'utf8')) as GenericMission[]
-    const unconditional = generics.filter((m) => m.requiredTags.length === 0)
-    expect(unconditional.length).toBeGreaterThanOrEqual(3)
+  it.runIf(existsSync(GENERICS))('汎用プールの検証を通る', () => {
+    const generics = JSON.parse(readFileSync(GENERICS, 'utf8'))
+    const errors = validateGenericMissions(generics)
+    expect(errors, JSON.stringify(errors.slice(0, 20), null, 2)).toEqual([])
   })
 })
 

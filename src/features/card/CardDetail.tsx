@@ -24,7 +24,7 @@ export function CardDetail({
 
   return (
     <article className="flex flex-1 flex-col">
-      <button onClick={onBack} className="mb-4 self-start py-2 text-sm text-stone-500">
+      <button onClick={onBack} className="mb-2 -ml-2 self-start px-2 py-3 text-sm text-stone-500">
         ← 戻る
       </button>
 

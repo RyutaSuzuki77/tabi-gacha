@@ -11,8 +11,8 @@
  *
  * 別のデータに差し替えた場合は、下の normalizeRow を直す。
  */
-import { readFileSync, writeFileSync } from 'node:fs'
-import { buildSkeletonTown, curate, parseCsv } from './skeleton.logic'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { buildSkeletonTown, curate, mergeEnrichment, parseCsv } from './skeleton.logic'
 import type { Town } from '../src/domain/types'
 
 const INPUT = 'scripts/raw/towns.csv'
@@ -36,8 +36,16 @@ const all = rows
   .filter((t): t is Town => t !== null)
 const selected = curate(all, perRegionPerRarity, Math.random)
 
-writeFileSync(OUTPUT, JSON.stringify(selected, null, 2) + '\n', 'utf8')
+// 既存の補完を引き継ぐ。再実行で Claude Code が埋めた内容を失わないため、また
+// 利用者の端末に残るカードが参照する町のidを消さないため（仕様 11.3 / 13）
+const existing: Town[] = existsSync(OUTPUT) ? JSON.parse(readFileSync(OUTPUT, 'utf8')) : []
+const merged = mergeEnrichment(existing, selected)
 
+writeFileSync(OUTPUT, JSON.stringify(merged, null, 2) + '\n', 'utf8')
+
+const carriedOver = merged.filter((t) => t.enriched).length
 console.log(`読み込み: ${rows.length} 行`)
 console.log(`対象（10万人未満）: ${all.length} 件`)
-console.log(`キュレート後: ${selected.length} 件 → ${OUTPUT}`)
+console.log(`キュレート後: ${selected.length} 件`)
+console.log(`補完を引き継いだ町: ${carriedOver} 件`)
+console.log(`出力: ${merged.length} 件 → ${OUTPUT}`)

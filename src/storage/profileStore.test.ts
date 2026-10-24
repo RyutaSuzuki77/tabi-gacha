@@ -67,6 +67,20 @@ describe('resetIfSchemaChanged', () => {
 })
 
 describe('localStorage が使えない環境', () => {
+  it('書き込みが失敗したあと、古い localStorage の値ではなく新しい値を返す', () => {
+    // 容量が尽きた環境：書き込みは失敗するが、localStorage には古い値が残っている。
+    // 退避先を先に見ないと、引いた直後のカードが古い内容に巻き戻る
+    const first = loadProfile()
+    saveProfile({ ...first, lastDrawnAt: '2026-10-20T00:00:00.000Z' })
+    expect(loadProfile().lastDrawnAt).toBe('2026-10-20T00:00:00.000Z')
+
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+      throw new DOMException('QuotaExceededError')
+    })
+    saveProfile({ ...first, lastDrawnAt: '2026-10-24T00:00:00.000Z' })
+    expect(loadProfile().lastDrawnAt).toBe('2026-10-24T00:00:00.000Z')
+  })
+
   it('書き込みが例外を投げても落ちず、同一セッション内では読み戻せる', () => {
     vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
       throw new DOMException('QuotaExceededError')

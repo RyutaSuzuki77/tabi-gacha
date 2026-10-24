@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import type { Origin } from '../maps/routeUrl'
+import { resolveOrigin } from './resolveOrigin'
 
 type State = 'idle' | 'asking' | 'granted' | 'denied' | 'manual'
 
@@ -33,13 +33,11 @@ export function useOrigin(fakeOrigin: { lat: number; lng: number } | null) {
     setState('manual')
   }, [])
 
-  const origin: Origin = fakeOrigin
-    ? { kind: 'coords', ...fakeOrigin }
-    : coords
-      ? { kind: 'coords', ...coords }
-      : manualValue.trim() !== ''
-        ? { kind: 'text', value: manualValue }
-        : null
-
-  return { origin, state, request, setManual, manualValue }
+  return {
+    origin: resolveOrigin(fakeOrigin, coords, manualValue),
+    state,
+    request,
+    setManual,
+    manualValue,
+  }
 }

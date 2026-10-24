@@ -1,6 +1,6 @@
 import 'fake-indexeddb/auto'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { addPhoto, classifyPhotoError, deletePhoto, listPhotos } from './photoStore'
+import { addPhoto, classifyPhotoError, deleteAllPhotos, deletePhoto, listPhotos } from './photoStore'
 
 function blob(text: string): Blob {
   return new Blob([text], { type: 'image/png' })
@@ -64,3 +64,29 @@ describe('photoStore', () => {
     expect(await listPhotos('p1')).toEqual([])
   })
 })
+
+describe('deleteAllPhotos', () => {
+  it('すべての写真を消す（スキーマ初期化時に孤児を残さない）', async () => {
+    await addPhoto('p1', blob('a'), new Date())
+    await addPhoto('p2', blob('b'), new Date())
+    await deleteAllPhotos()
+    expect(await listPhotos('p1')).toEqual([])
+    expect(await listPhotos('p2')).toEqual([])
+  })
+})
+
+describe('保存に失敗したとき', () => {
+  it('容量超過なら quota を返して落ちない', async () => {
+    const original = IDBObjectStore.prototype.put
+    IDBObjectStore.prototype.put = function () {
+      throw new DOMException('full', 'QuotaExceededError')
+    } as typeof original
+    try {
+      const result = await addPhoto('p1', blob('a'), new Date())
+      expect(result.ok).toBe(false)
+      if (!result.ok) expect(result.reason).toBe('quota')
+    } finally {
+      IDBObjectStore.prototype.put = original
+    }
+  })
+}) 

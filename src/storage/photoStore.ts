@@ -133,3 +133,27 @@ export async function deletePhoto(id: string): Promise<void> {
     }
   })
 }
+
+/**
+ * すべての写真を消す（仕様 13）。
+ *
+ * スキーマの初期化は localStorage のキーしか消さないため、これを呼ばないと
+ * 写真が存在しない pull に紐づいたまま IndexedDB に残り続ける。画面からは
+ * 見えず消せもせず、端末の容量を占めたままになる。
+ */
+export async function deleteAllPhotos(): Promise<void> {
+  const db = await openPhotoDb()
+  if (!db) return
+
+  await new Promise<void>((resolve) => {
+    try {
+      const tx = db.transaction(STORE, 'readwrite')
+      tx.objectStore(STORE).clear()
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => resolve()
+      tx.onabort = () => resolve()
+    } catch {
+      resolve()
+    }
+  })
+}

@@ -28,15 +28,20 @@ export const MIN_POPULATION = 100
 /**
  * 出題対象から外す名称か（仕様 4.1）。
  *
- * - 「区」で終わる: 特別区（東京23区）と政令市の行政区。市町村で「区」で終わるのは
- *   この2種類だけなので、この条件で両方を確実に落とせる
- * - 「郡」で終わる: e-Stat のデータに含まれる**郡ごとの集計行**。自治体ではない
- *   （例: 秋田県鹿角郡 4,297人 = 構成町村の合計）。実在の自治体名が「郡」で
- *   終わることはなく、郡を含む自治体は「紋別郡西興部村」のように町村名で終わる
+ * 市町村の名前は必ず「市」「町」「村」で終わる。これを満たさない行は自治体ではない。
+ * 禁止する語を並べる形から、満たすべき形を要求する形に変えてある。前者では
+ * 次の3種類を1つずつ数え上げる必要があり、数え漏れが実際に起きた。
+ *
+ * - 「区」で終わる: 特別区（東京23区）と政令市の行政区。千代田区のように人口が
+ *   10万人を下回る区があり、人口の条件だけでは通ってしまう
+ * - 「郡」で終わる: e-Stat の**郡ごとの集計行**（例: 秋田県鹿角郡 = 構成町村の合計）
+ * - それ以外の集計行: 「島しょ」のような広域の集計行。区でも郡でもないため、
+ *   禁止語を並べる形では取り逃がしていた
+ *
+ * 郡を含む自治体（「紋別郡西興部村」）は町村で終わるので除外されない。
  */
 export function isExcludedName(name: string): boolean {
-  const trimmed = name.trim()
-  return trimmed.endsWith('区') || trimmed.endsWith('郡')
+  return !/[市町村]$/.test(name.trim())
 }
 
 export function parsePopulation(raw: string): number | null {
@@ -117,4 +122,34 @@ function shuffle<T>(items: T[], rng: Rng): T[] {
     ;[result[i], result[j]] = [result[j], result[i]]
   }
   return result
+}
+
+/**
+ * 既存の towns.json の補完内容を、新しく選抜した町に引き継ぐ（仕様 11.3）。
+ *
+ * 骨格を作り直すたびに補完が消えると、Claude Code で埋めた分が失われる。
+ * さらに、利用者の端末に残る pull は町のidを指しているため、idが入れ替わると
+ * カードが黙って消え、累計ポイントと称号も下がる（仕様13が禁じる「黙って壊れる」形）。
+ * そこで、補完済みの町は選抜から外れても出力に残す。idは増えるだけで減らない。
+ */
+export function mergeEnrichment(existing: Town[], selected: Town[]): Town[] {
+  const enrichedById = new Map(existing.filter((t) => t.enriched).map((t) => [t.id, t]))
+
+  const merged = selected.map((town) => {
+    const before = enrichedById.get(town.id)
+    if (!before) return town
+    return {
+      ...town,
+      tags: before.tags,
+      uniqueMission: before.uniqueMission,
+      accessTips: before.accessTips,
+      enriched: true,
+    }
+  })
+
+  const selectedIds = new Set(selected.map((t) => t.id))
+  for (const [id, town] of enrichedById) {
+    if (!selectedIds.has(id)) merged.push(town)
+  }
+  return merged
 }

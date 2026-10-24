@@ -9,7 +9,8 @@ import { loadGameData } from '../data/loadGameData'
 import { loadDemo, saveDemo, type DemoSettings } from '../storage/demoStore'
 import { loadProfile, recordDraw } from '../storage/profileStore'
 import { addPull, loadPulls, setMissionDone } from '../storage/pullStore'
-import { newId, resetIfSchemaChanged } from '../storage/schema'
+import { deleteAllPhotos } from '../storage/photoStore'
+import { isStorageAvailable, newId, resetIfSchemaChanged } from '../storage/schema'
 
 export function useGame() {
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
@@ -19,8 +20,16 @@ export function useGame() {
   // 初期化の判定を最初に走らせる。profile より後に置くと、読み込んだ直後の
   // profile を消してしまい、画面と保存内容がずれる
   const [wasReset] = useState(() => resetIfSchemaChanged())
+  // 書き込みの可否は一度だけ調べる（描画のたびに localStorage を触らないため）
+  const [storageWritable] = useState(() => isStorageAvailable())
   const [profile, setProfile] = useState(() => loadProfile())
   const [demo, setDemo] = useState<DemoSettings>(() => loadDemo())
+
+  useEffect(() => {
+    // スキーマ初期化は localStorage のキーしか消さない。写真を消さないと、
+    // 存在しない pull に紐づいたまま端末の容量を占め続ける（仕様 13）
+    if (wasReset) void deleteAllPhotos()
+  }, [wasReset])
 
   useEffect(() => {
     setPulls(loadPulls())
@@ -73,7 +82,7 @@ export function useGame() {
   }, [])
 
   return {
-    status, towns, generics, pulls, profile, demo, wasReset,
+    status, towns, generics, pulls, profile, demo, wasReset, storageWritable,
     total, rank, canDrawNow, townById,
     draw, toggleMission, updateDemo,
   }

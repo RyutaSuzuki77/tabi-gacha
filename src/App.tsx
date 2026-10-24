@@ -45,6 +45,13 @@ export default function App() {
       </header>
 
       <main className="flex flex-1 flex-col px-4 pb-24 md:px-8 md:pb-8">
+        {!game.storageWritable && (
+          <p className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
+            この画面では引いたカードを保存できません（プライベートブラウズか、端末の空き容量が
+            足りない可能性があります）。タブを閉じると、引いたカードと写真は失われます。
+          </p>
+        )}
+
         {game.wasReset && (
           <p className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
             保存形式が変わったため、これまでのデータを初期化しました。
@@ -98,6 +105,7 @@ export default function App() {
                 <ProfileScreen
                   total={game.total}
                   pullCount={game.pulls.length}
+                  storageWritable={game.storageWritable}
                   demoPanel={<DemoModePanel demo={game.demo} onChange={game.updateDemo} />}
                 />
               )}

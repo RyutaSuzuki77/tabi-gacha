@@ -25,7 +25,7 @@ export function AccessSection({
         {needsPrompt && !promptShown && (
           <button
             onClick={() => setPromptShown(true)}
-            className="py-2 text-sm text-stone-500 underline"
+            className="px-2 py-3 text-sm text-stone-500 underline"
           >
             出発地を設定する
           </button>

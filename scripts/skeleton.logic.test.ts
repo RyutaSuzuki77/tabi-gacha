@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   buildSkeletonTown,
   curate,
+  mergeEnrichment,
   parseCsv,
   parsePopulation,
   regionForPrefecture,
@@ -146,6 +147,13 @@ describe('buildSkeletonTown', () => {
     expect(buildSkeletonTown({ ...row, name: '紋別郡西興部村' })).not.toBeNull()
   })
 
+  it('市町村で終わらない名前（広域の集計行）は除外する', () => {
+    // 「島しょ」は東京都の島部の集計行で、区でも郡でもないが自治体でもない
+    expect(buildSkeletonTown({
+      code: '13360', prefecture: '東京都', name: '島しょ', population: '22627',
+    })).toBeNull()
+  })
+
   it('人口・都道府県が読めない行は null', () => {
     expect(buildSkeletonTown({ ...row, population: '不明' })).toBeNull()
     expect(buildSkeletonTown({ ...row, prefecture: '架空県' })).toBeNull()
@@ -183,5 +191,43 @@ describe('curate', () => {
     ]
     const got = curate(towns, 1, rng)
     expect(new Set(got.map((t) => t.rarity))).toEqual(new Set(['SSR', 'SR', 'R', 'N']))
+  })
+})
+
+describe('mergeEnrichment', () => {
+  function t(id: string, enriched: boolean): Town {
+    return {
+      id, name: `${id}町`, prefecture: 'X県', region: '中国',
+      population: 5000, rarity: 'SR',
+      tags: enriched ? ['山間'] : [],
+      uniqueMission: enriched ? `${id}の固有ミッション` : '',
+      accessTips: enriched ? `${id}への行き方` : '',
+      enriched,
+    }
+  }
+
+  it('既存の補完を新しい選抜に引き継ぐ', () => {
+    const got = mergeEnrichment([t('a', true)], [t('a', false), t('b', false)])
+    const a = got.find((x) => x.id === 'a')!
+    expect(a.enriched).toBe(true)
+    expect(a.uniqueMission).toBe('aの固有ミッション')
+    expect(a.accessTips).toBe('aへの行き方')
+    expect(a.tags).toEqual(['山間'])
+  })
+
+  it('新しい選抜に入らなかった補完済みの町も残す（利用者のカードが孤児にならない）', () => {
+    const got = mergeEnrichment([t('old', true)], [t('new', false)])
+    expect(got.map((x) => x.id).sort()).toEqual(['new', 'old'])
+    expect(got.find((x) => x.id === 'old')!.enriched).toBe(true)
+  })
+
+  it('未補完の既存町は持ち越さない', () => {
+    const got = mergeEnrichment([t('skeleton', false)], [t('new', false)])
+    expect(got.map((x) => x.id)).toEqual(['new'])
+  })
+
+  it('同じ町を二重に出さない', () => {
+    const got = mergeEnrichment([t('a', true)], [t('a', false)])
+    expect(got).toHaveLength(1)
   })
 })
