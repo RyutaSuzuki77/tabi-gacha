@@ -1,14 +1,20 @@
 import type { Rarity } from '../domain/types'
 
-const STYLE: Record<Rarity, string> = {
-  SSR: 'bg-amber-400 text-amber-950',
-  SR: 'bg-violet-400 text-violet-950',
-  R: 'bg-sky-400 text-sky-950',
-  N: 'bg-stone-300 text-stone-700',
+/** レア度の色はカプセルの殻の色。バッジ・演出・コレクションで同じ値を使う */
+export const RARITY_COLOR: Record<Rarity, string> = {
+  SSR: 'var(--color-ssr)',
+  SR: 'var(--color-sr)',
+  R: 'var(--color-r)',
+  N: 'var(--color-n)',
 }
 
 export function RarityBadge({ rarity }: { rarity: Rarity }) {
   return (
-    <span className={`rounded px-2 py-0.5 text-xs font-bold ${STYLE[rarity]}`}>{rarity}</span>
+    <span
+      className="inline-block rounded-full px-3 py-1 font-display text-xs leading-none text-sumi"
+      style={{ background: RARITY_COLOR[rarity] }}
+    >
+      {rarity}
+    </span>
   )
 }

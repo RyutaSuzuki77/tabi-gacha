@@ -61,10 +61,10 @@ export function PhotoSection({ pullId }: { pullId: string }) {
   }
 
   return (
-    <section className="border-t border-stone-200 pt-4">
+    <section className="">
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-bold">写真</h3>
-        <button onClick={handleAddClick} className="px-2 py-3 text-sm text-stone-500 underline">
+        <h3 className="font-display text-lg">写真</h3>
+        <button onClick={handleAddClick} className="px-2 py-3 text-sm text-kinari/70 underline">
           ＋追加
         </button>
       </div>
@@ -82,18 +82,18 @@ export function PhotoSection({ pullId }: { pullId: string }) {
       />
 
       {showNotice && (
-        <div className="mb-3 rounded-lg bg-stone-50 p-3 text-xs leading-relaxed text-stone-600">
+        <div className="mb-3 rounded-xl border-2 border-ai-mid bg-ai-mid/40 p-3 text-xs leading-relaxed">
           <p>写真はこの端末の中にだけ保存されます。大切な写真は端末のカメラロールにも残しておいてください。</p>
-          <button onClick={acceptNotice} className="mt-2 rounded bg-stone-900 px-4 py-3 text-white">
+          <button onClick={acceptNotice} className="mt-2 rounded-full bg-kinari px-5 py-3 font-bold text-sumi">
             わかった
           </button>
         </div>
       )}
 
-      {error && <p className="mb-2 text-xs text-amber-700">{error}</p>}
+      {error && <p className="mb-2 rounded-lg bg-ssr/20 px-3 py-2 text-xs text-ssr">{error}</p>}
 
       {photos.length === 0 ? (
-        <p className="text-xs text-stone-400">まだ写真がありません。</p>
+        <p className="text-xs text-kinari/50">まだ写真がありません。</p>
       ) : (
         <div className="grid grid-cols-3 gap-2">
           {photos.map((photo, index) => (
@@ -101,35 +101,41 @@ export function PhotoSection({ pullId }: { pullId: string }) {
               <img
                 src={urls[index]}
                 alt=""
-                className="aspect-square w-full rounded object-cover"
+                className={`aspect-square w-full rounded-xl object-cover ${
+                  confirmingId === photo.id ? 'ring-4 ring-beni' : ''
+                }`}
               />
-              {confirmingId === photo.id ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 rounded bg-black/70 p-1 text-center">
-                  <span className="text-[10px] text-white">消すと戻せません</span>
-                  <button
-                    onClick={() => void handleDelete(photo.id)}
-                    className="w-full rounded bg-red-600 px-2 py-2 text-xs text-white"
-                  >
-                    消す
-                  </button>
-                  <button
-                    onClick={() => setConfirmingId(null)}
-                    className="w-full rounded bg-white/90 px-2 py-2 text-xs"
-                  >
-                    やめる
-                  </button>
-                </div>
-              ) : (
-                <button
-                  onClick={() => setConfirmingId(photo.id)}
-                  aria-label="この写真を削除する"
-                  className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-bl bg-black/50 text-white"
-                >
-                  ×
-                </button>
-              )}
+              <button
+                onClick={() => setConfirmingId(photo.id)}
+                aria-label="この写真を削除する"
+                className="absolute right-0 top-0 flex h-11 w-11 items-center justify-center rounded-bl-xl bg-black/50 text-white"
+              >
+                ×
+              </button>
             </div>
           ))}
+        </div>
+      )}
+
+      {confirmingId && (
+        <div className="mt-3 rounded-xl border-2 border-beni/60 bg-beni/15 p-3">
+          <p className="text-xs leading-relaxed">
+            この写真を消します。この端末にしか残っていないので、消すと戻せません。
+          </p>
+          <div className="mt-3 flex gap-2">
+            <button
+              onClick={() => void handleDelete(confirmingId)}
+              className="flex-1 rounded-full bg-beni px-4 py-3 text-sm font-bold text-white"
+            >
+              消す
+            </button>
+            <button
+              onClick={() => setConfirmingId(null)}
+              className="flex-1 rounded-full border-2 border-kinari/30 px-4 py-3 text-sm font-bold"
+            >
+              やめる
+            </button>
+          </div>
         </div>
       )}
     </section>

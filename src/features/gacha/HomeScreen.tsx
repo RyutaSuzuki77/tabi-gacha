@@ -1,7 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { DrawMode } from '../../domain/pool'
-import { REGIONS, type Region } from '../../domain/types'
+import { REGIONS, type Pull, type Rarity, type Region } from '../../domain/types'
+import { GachaMachine, type MachinePhase } from './GachaMachine'
 import { PoolNotice } from './PoolNotice'
+
+const TURN_MS = 620
+const DROP_MS = 900
+const CRACK_MS = 560
 
 export function HomeScreen({
   canDraw,
@@ -9,49 +14,107 @@ export function HomeScreen({
   total,
   demoActive,
   onDraw,
+  rarityOf,
+  onRevealed,
 }: {
   canDraw: boolean
   rankTitle: string
   total: number
   demoActive: boolean
-  onDraw: (mode: DrawMode) => void
+  onDraw: (mode: DrawMode) => Pull | null
+  rarityOf: (pull: Pull) => Rarity | undefined
+  onRevealed: (pull: Pull) => void
 }) {
   const [region, setRegion] = useState<Region | 'all'>('all')
-  const mode: DrawMode = region === 'all' ? { kind: 'nationwide' } : { kind: 'region', region }
+  const [phase, setPhase] = useState<MachinePhase>('idle')
+  const [pull, setPull] = useState<Pull | null>(null)
+
+  // コールバックは ref で持つ。依存に入れると演出中の再描画でタイマーが振り出しに戻る
+  const onRevealedRef = useRef(onRevealed)
+  onRevealedRef.current = onRevealed
+
+  useEffect(() => {
+    if (phase === 'turning') {
+      const t = setTimeout(() => setPhase('dropping'), TURN_MS)
+      return () => clearTimeout(t)
+    }
+    if (phase === 'dropping') {
+      const t = setTimeout(() => setPhase('waiting'), DROP_MS)
+      return () => clearTimeout(t)
+    }
+    if (phase === 'cracking') {
+      const t = setTimeout(() => {
+        if (pull) onRevealedRef.current(pull)
+        setPhase('idle')
+        setPull(null)
+      }, CRACK_MS)
+      return () => clearTimeout(t)
+    }
+  }, [phase, pull])
+
+  function handleTurn() {
+    const mode: DrawMode = region === 'all' ? { kind: 'nationwide' } : { kind: 'region', region }
+    const drawn = onDraw(mode)
+    if (!drawn) return
+    setPull(drawn)
+    setPhase('turning')
+  }
+
+  const rarity = pull ? rarityOf(pull) ?? null : null
+  const busy = phase !== 'idle'
 
   return (
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
-      <label className="mb-6 block">
-        <span className="mb-1 block text-xs text-stone-500">どこから引く</span>
-        <select
-          value={region}
-          onChange={(e) => setRegion(e.target.value as Region | 'all')}
-          className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2"
+      <div className="mb-5 flex items-center gap-2">
+        <button
+          onClick={() => setRegion('all')}
+          disabled={busy}
+          className={`rounded-full px-5 py-3 text-sm font-bold transition-colors disabled:opacity-50 ${
+            region === 'all' ? 'bg-kinari text-sumi' : 'bg-ai-mid text-kinari/70'
+          }`}
         >
-          <option value="all">全国</option>
-          {REGIONS.map((r) => (
-            <option key={r} value={r}>{r}</option>
-          ))}
-        </select>
-      </label>
+          全国
+        </button>
+        <div className="relative flex-1">
+          <select
+            value={region === 'all' ? '' : region}
+            onChange={(e) => setRegion((e.target.value || 'all') as Region | 'all')}
+            disabled={busy}
+            className={`w-full appearance-none rounded-full py-3 pl-5 pr-10 text-sm font-bold
+                        disabled:opacity-50 ${
+                          region === 'all' ? 'bg-ai-mid text-kinari/70' : 'bg-kinari text-sumi'
+                        }`}
+          >
+            <option value="">地方をえらぶ</option>
+            {REGIONS.map((r) => (
+              <option key={r} value={r}>{r}</option>
+            ))}
+          </select>
+          <span className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-xs">▾</span>
+        </div>
+      </div>
 
-      <button
-        onClick={() => onDraw(mode)}
+      <GachaMachine
+        phase={phase}
+        rarity={rarity}
         disabled={!canDraw}
-        className="mx-auto flex h-40 w-40 items-center justify-center rounded-full bg-stone-900 text-xl font-bold text-white disabled:bg-stone-300"
-      >
-        引く
-      </button>
+        onTurn={handleTurn}
+        onOpen={() => setPhase('cracking')}
+      />
 
-      <p className="mt-6 text-center text-sm text-stone-500">
-        {canDraw ? '今日はまだ引けます' : '今日はもう引きました'}
-        <span className="mx-2">·</span>
-        {rankTitle}（{total}pt）
-      </p>
-
-      {demoActive && (
-        <p className="mt-2 text-center text-xs text-amber-700">デモモードが有効です</p>
-      )}
+      <div className="mt-6 text-center">
+        <p className="font-display text-base">
+          {canDraw ? '今日はまだ ひける' : 'きょうのぶんは ひいた'}
+        </p>
+        <p className="mt-1 text-xs text-kinari/60">
+          {rankTitle}　{total}pt
+        </p>
+        {demoActive && (
+          <p className="mt-2 inline-block rounded-full bg-ssr px-3 py-1 text-xs font-bold text-sumi">
+            デモモードが有効
+          </p>
+        )}
+      </div>
 
       <PoolNotice />
     </div>

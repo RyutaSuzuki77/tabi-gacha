@@ -1,10 +1,8 @@
 import { useState } from 'react'
-import type { DrawMode } from './domain/pool'
 import type { Pull } from './domain/types'
 import { useGame } from './state/useGame'
 import { CardDetail } from './features/card/CardDetail'
 import { CollectionScreen } from './features/collection/CollectionScreen'
-import { DrawAnimation } from './features/gacha/DrawAnimation'
 import { HomeScreen } from './features/gacha/HomeScreen'
 import { DemoModePanel } from './features/profile/DemoModePanel'
 import { ProfileScreen } from './features/profile/ProfileScreen'
@@ -15,16 +13,9 @@ export default function App() {
   const game = useGame()
   const [tab, setTab] = useState<TabId>('gacha')
   const [selectedPull, setSelectedPull] = useState<Pull | null>(null)
-  const [pendingPull, setPendingPull] = useState<Pull | null>(null)
-
-  function handleDraw(mode: DrawMode) {
-    const pull = game.draw(mode)
-    if (pull) setPendingPull(pull)
-  }
 
   function changeTab(next: TabId) {
     setSelectedPull(null)
-    setPendingPull(null)
     setTab(next)
   }
 
@@ -39,41 +30,37 @@ export default function App() {
 
   return (
     <Layout>
-      <header className="px-4 pt-6 md:px-8">
-        <h1 className="text-2xl font-bold tracking-tight">旅ガチャ</h1>
+      <header className="px-4 pt-7 md:px-8">
+        <h1 className="font-display text-3xl leading-none">
+          旅<span className="text-beni">ガチャ</span>
+        </h1>
         <TabBar active={tab} onChange={changeTab} />
       </header>
 
       <main className="flex flex-1 flex-col px-4 pb-24 md:px-8 md:pb-8">
         {!game.storageWritable && (
-          <p className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
+          <p className="mb-4 rounded-xl bg-ssr/15 px-4 py-3 text-xs leading-relaxed text-ssr">
             この画面では引いたカードを保存できません（プライベートブラウズか、端末の空き容量が
             足りない可能性があります）。タブを閉じると、引いたカードと写真は失われます。
           </p>
         )}
 
         {game.wasReset && (
-          <p className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
+          <p className="mb-4 rounded-xl bg-ssr/15 px-4 py-3 text-xs text-ssr">
             保存形式が変わったため、これまでのデータを初期化しました。
           </p>
         )}
 
-        {game.status === 'loading' && <p className="text-stone-400">読み込み中…</p>}
+        {game.status === 'loading' && (
+          <p className="mt-16 text-center font-display text-lg text-kinari/50">よみこみ中…</p>
+        )}
         {game.status === 'error' && (
-          <p className="text-red-600">町データの読み込みに失敗しました。再読み込みしてください。</p>
+          <p className="mt-16 rounded-xl bg-beni/20 px-4 py-4 text-center text-sm text-kinari">
+            町データを読み込めませんでした。ページを再読み込みしてください。
+          </p>
         )}
 
-        {game.status === 'ready' && pendingPull && game.townById(pendingPull.townId) && (
-          <DrawAnimation
-            rarity={game.townById(pendingPull.townId)!.rarity}
-            onDone={() => {
-              setSelectedPull(pendingPull)
-              setPendingPull(null)
-            }}
-          />
-        )}
-
-        {game.status === 'ready' && !pendingPull && (
+        {game.status === 'ready' && (
           current && currentTown ? (
             <CardDetail
               pull={current}
@@ -91,7 +78,9 @@ export default function App() {
                   rankTitle={game.rank.title}
                   total={game.total}
                   demoActive={demoActive}
-                  onDraw={handleDraw}
+                  onDraw={game.draw}
+                  rarityOf={(p) => game.townById(p.townId)?.rarity}
+                  onRevealed={setSelectedPull}
                 />
               )}
               {tab === 'collection' && (

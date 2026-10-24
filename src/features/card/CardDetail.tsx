@@ -1,6 +1,7 @@
 import { pointsForPull } from '../../domain/points'
+import { splitTownName } from '../../domain/townName'
 import type { GenericMission, Pull, Town } from '../../domain/types'
-import { RarityBadge } from '../../ui/RarityBadge'
+import { RARITY_COLOR, RarityBadge } from '../../ui/RarityBadge'
 import { AccessSection } from './AccessSection'
 import { MissionList } from './MissionList'
 import { PhotoSection } from './PhotoSection'
@@ -21,33 +22,62 @@ export function CardDetail({
   onBack: () => void
 }) {
   const earned = pointsForPull(town.rarity, pull.missions)
+  const { county, town: name } = splitTownName(town.name)
 
   return (
     <article className="flex flex-1 flex-col">
-      <button onClick={onBack} className="mb-2 -ml-2 self-start px-2 py-3 text-sm text-stone-500">
-        ← 戻る
+      <button onClick={onBack} className="-ml-2 mb-3 self-start px-2 py-3 text-sm text-kinari/70">
+        ← もどる
       </button>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <RarityBadge rarity={town.rarity} />
-        <h2 className="text-xl font-bold">{town.name}</h2>
-        <span className="text-sm text-stone-500">{town.prefecture}</span>
+      {/* 町の境界標識。町名をいちばん大きく置く */}
+      <div className="sign-plate anim-sign rounded-2xl bg-kinari px-5 py-7 text-sumi">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-bold tracking-wide text-sumi/55">
+              {town.prefecture}
+              {county && ` ${county}`}
+            </p>
+            <h2 className="mt-1 break-words font-display text-4xl leading-tight sm:text-5xl">
+              {name}
+            </h2>
+          </div>
+          <RarityBadge rarity={town.rarity} />
+        </div>
+
+        <div className="mt-5 flex items-end justify-between gap-3 border-t-2 border-dashed border-sumi/20 pt-4">
+          <p>
+            <span className="font-display text-2xl">{town.population.toLocaleString()}</span>
+            <span className="ml-1 text-xs text-sumi/60">人</span>
+          </p>
+          <div className="flex flex-wrap justify-end gap-1">
+            {town.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-full border-2 border-sumi/15 px-2 py-0.5 text-xs font-bold"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        </div>
       </div>
 
-      <p className="mt-1 text-xs text-stone-500">
-        人口 {town.population.toLocaleString()}人
-        {town.tags.map((tag) => (
-          <span key={tag} className="ml-1 rounded bg-stone-100 px-1">{tag}</span>
-        ))}
-      </p>
-
-      {/* 広い画面では「ミッション」と「行き方＋写真」を左右に並べる（仕様 9.1）。
-          Task 13 の AccessSection と Task 16 の PhotoSection をこの中に足す */}
       <div className="mt-6 grid gap-6 lg:grid-cols-2 lg:gap-8">
         <section>
-          <h3 className="mb-2 text-sm font-bold">ミッション</h3>
+          <div className="mb-3 flex items-baseline justify-between">
+            <h3 className="font-display text-lg">ミッション</h3>
+            <p className="text-sm">
+              <span
+                className="font-display text-xl"
+                style={{ color: earned > 0 ? RARITY_COLOR[town.rarity] : undefined }}
+              >
+                {earned}
+              </span>
+              <span className="ml-0.5 text-xs text-kinari/60">pt</span>
+            </p>
+          </div>
           <MissionList pull={pull} town={town} generics={generics} onToggle={onToggle} />
-          <p className="mt-2 text-xs text-stone-500">獲得 {earned}pt</p>
         </section>
 
         <AccessSection town={town} fakeOrigin={fakeOrigin} />

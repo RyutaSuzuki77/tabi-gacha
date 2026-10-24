@@ -16,16 +16,32 @@ export function MissionList({
     <ul className="space-y-2">
       {pull.missions.map((mission, index) => (
         <li key={index}>
-          <label className="flex items-start gap-3 py-3">
+          <label
+            className={`flex items-start gap-3 rounded-xl border-2 px-3 py-3 transition-colors ${
+              mission.done ? 'border-beni/50 bg-beni/15' : 'border-ai-mid bg-ai-mid/40'
+            }`}
+          >
             <input
               type="checkbox"
               checked={mission.done}
               onChange={(e) => onToggle(index, e.target.checked)}
-              className="mt-1 h-5 w-5 shrink-0"
+              className="peer sr-only"
             />
-            <span className={mission.done ? 'text-stone-400 line-through' : ''}>
+            <span
+              aria-hidden
+              className={`mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full border-2 text-xs font-bold ${
+                mission.done
+                  ? 'border-beni bg-beni text-white'
+                  : 'border-kinari/40 text-transparent'
+              }`}
+            >
+              ✓
+            </span>
+            <span className={`text-sm leading-relaxed ${mission.done ? 'text-kinari/50' : ''}`}>
               {mission.kind === 'unique' && (
-                <span className="mr-1 rounded bg-stone-900 px-1 text-[10px] text-white">固有</span>
+                <span className="mr-1.5 rounded bg-ssr px-1.5 py-0.5 font-display text-[10px] text-sumi">
+                  この町だけ
+                </span>
               )}
               {resolveMissionText(mission, town, generics)}
             </span>
