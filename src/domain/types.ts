@@ -7,6 +7,21 @@ export const REGIONS: readonly Region[] = [
   '北海道', '東北', '関東', '中部', '近畿', '中国', '四国', '九州沖縄',
 ] as const
 
+/**
+ * 汎用ミッションの成立条件に使える語彙。これ以外のタグは検証で弾く（仕様 5.2）。
+ * タグは「その町に固定の性質」に限る。季節で変わるもの（積雪など）は入れない
+ * ―― 夏に引いた人に冬のミッションが出てしまうため。季節の事情は accessTips 側に書く。
+ */
+export const TOWN_TAGS = [
+  '海沿い',
+  '山間',
+  '温泉あり',
+  '鉄道駅なし',
+  '離島',
+  '城下町',
+  '湖畔',
+] as const
+
 export interface Town {
   id: string
   name: string
