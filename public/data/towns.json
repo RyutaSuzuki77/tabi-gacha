@@ -6,10 +6,13 @@
     "region": "北海道",
     "population": 2510,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い",
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "ニシンで栄えた頃の名残を岸辺で探し、いま何が獲れているかを港で確かめる",
+    "accessTips": "鉄道駅はなく、余市方面からのバスか車で入る。日本海沿いの道は冬季に風雪で通りにくくなることがある。",
+    "enriched": true
   },
   {
     "id": "01430",
@@ -18,10 +21,12 @@
     "region": "北海道",
     "population": 2624,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "かつて集治監が置かれた町である。その歴史を伝える場所を訪ね、開拓と囚人の関わりを確かめる",
+    "accessTips": "鉄道駅はなく、岩見沢や滝川方面からのバスか車で入る。石狩川沿いの平地で、冬は積雪が多い。",
+    "enriched": true
   },
   {
     "id": "01404",
@@ -126,10 +131,13 @@
     "region": "北海道",
     "population": 4688,
     "rarity": "SR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い",
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "サケの遡上で知られる川のそばに立ち、海と川のどちらに魚が多いか地元の人に聞く",
+    "accessTips": "鉄道駅はなく、中標津方面からの車かバスで入る。冬は路面の凍結と風雪に備えたい。",
+    "enriched": true
   },
   {
     "id": "01639",
@@ -138,10 +146,12 @@
     "region": "北海道",
     "population": 3052,
     "rarity": "SR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "十勝の畑がどこまで続くか、見通しのきく場所に立って端が見えるか確かめる",
+    "accessTips": "鉄道駅はなく、帯広方面からの車が前提になる。広い農地のあいだを走るため日没後は目印が少ない。",
+    "enriched": true
   },
   {
     "id": "01332",
@@ -247,9 +257,9 @@
     "population": 16001,
     "rarity": "R",
     "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "uniqueMission": "羊の飼育で知られる市である。羊にちなむものを一つ食べるか買って帰る",
+    "accessTips": "宗谷本線の駅がある。駅から市街は歩ける範囲だが、郊外の牧場へは車が要る。冬は積雪が深い。",
+    "enriched": true
   },
   {
     "id": "01345",
@@ -258,10 +268,12 @@
     "region": "北海道",
     "population": 13268,
     "rarity": "R",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い"
+    ],
+    "uniqueMission": "駅弁で名を知られる町である。噴火湾を望む場所で、この海で獲れたものを食べる",
+    "accessTips": "函館本線の駅があり特急も停まる。駒ヶ岳の裾を回る道は冬季に視界が悪くなることがある。",
+    "enriched": true
   },
   {
     "id": "01346",
@@ -366,10 +378,12 @@
     "region": "北海道",
     "population": 97032,
     "rarity": "N",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "湖畔"
+    ],
+    "uniqueMission": "空港の町として知られるが、湖から流れ出す川も市内を通る。その水に触れて空港の喧騒と比べる",
+    "accessTips": "千歳線の駅と空港があり交通は良い。湖の方面はバスの本数が限られるため時間に余裕をみたい。",
+    "enriched": true
   },
   {
     "id": "01236",
@@ -378,10 +392,12 @@
     "region": "北海道",
     "population": 42159,
     "rarity": "N",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い"
+    ],
+    "uniqueMission": "新幹線の駅名になっている市である。駅前と、米どころである平野部の落差を自分の足で確かめる",
+    "accessTips": "新幹線と函館本線の駅がある。市域は広く、海沿いと内陸で様子が違うため車があると動きやすい。",
+    "enriched": true
   },
   {
     "id": "01211",
@@ -486,10 +502,12 @@
     "region": "東北",
     "population": 2768,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間"
+    ],
+    "uniqueMission": "赤べこの発祥とされる町である。その由来を現地の説明で確かめ、一つ買って帰る",
+    "accessTips": "只見線の駅がある。本数は少なく乗り遅れると次が遠い。川沿いの道は冬季に積雪がある。",
+    "enriched": true
   },
   {
     "id": "05368",
@@ -498,10 +516,12 @@
     "region": "東北",
     "population": 2916,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "干拓して作られた村である。海面より低い土地に立っていることを示すものを探す",
+    "accessTips": "鉄道駅はなく、八郎潟駅からのバスか車で入る。村内は直線の農道が多く目印が少ない。",
+    "enriched": true
   },
   {
     "id": "07364",
@@ -606,10 +626,12 @@
     "region": "東北",
     "population": 8250,
     "rarity": "SR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い"
+    ],
+    "uniqueMission": "日本海に面した港町である。水揚げされている魚を見て、名前を一つ覚えて帰る",
+    "accessTips": "五能線の駅がある。本数は少なく、海沿いを走るため強風で止まることがある。",
+    "enriched": true
   },
   {
     "id": "06403",
@@ -618,10 +640,12 @@
     "region": "東北",
     "population": 6076,
     "rarity": "SR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間"
+    ],
+    "uniqueMission": "飯豊の山並みの麓に広がる町である。山がいちばんよく見える場所を探し、形を覚えて帰る",
+    "accessTips": "米坂線の駅がある。本数は限られ、冬季は雪で運転を見合わせることがある。山側は車が無難。",
+    "enriched": true
   },
   {
     "id": "07503",
@@ -727,9 +751,9 @@
     "population": 13016,
     "rarity": "R",
     "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "uniqueMission": "在来の豆が受け継がれている町である。その豆を使ったものを探して食べるか買う",
+    "accessTips": "米坂線の駅がある。本数は限られる。町域は平地が広く、自転車でも回れる。",
+    "enriched": true
   },
   {
     "id": "07521",
@@ -738,10 +762,12 @@
     "region": "東北",
     "population": 15819,
     "rarity": "R",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "城下町"
+    ],
+    "uniqueMission": "城下の町割りが残る町である。坂と曲がり道をたどって、城下がどう組まれていたか確かめる",
+    "accessTips": "磐越東線の駅がある。駅から中心部は離れており、バスか徒歩で坂を上がる。桜の時期は道が混む。",
+    "enriched": true
   },
   {
     "id": "05348",
@@ -846,10 +872,12 @@
     "region": "東北",
     "population": 32301,
     "rarity": "N",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間"
+    ],
+    "uniqueMission": "石灰岩の地下世界が知られる市である。地上と地下で空気の温度がどれだけ違うか体で確かめる",
+    "accessTips": "磐越東線の駅がある。市域は広く、見どころは駅から離れているため車かバスが要る。",
+    "enriched": true
   },
   {
     "id": "03216",
@@ -859,9 +887,9 @@
     "population": 53876,
     "rarity": "N",
     "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "uniqueMission": "かつて日本でいちばん人口の多い村だった市である。村から市になった痕跡を現地で探す",
+    "accessTips": "いわて銀河鉄道の駅がある。盛岡に隣接し行きやすいが、山側へは車が無難。",
+    "enriched": true
   },
   {
     "id": "04214",
@@ -966,10 +994,13 @@
     "region": "関東",
     "population": 2336,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "離島",
+      "海沿い"
+    ],
+    "uniqueMission": "島でしか採れない軽い石が塀や建物に使われている。その石を見つけ、手で持って軽さを確かめる",
+    "accessTips": "船か飛行機で渡る。海況で欠航することがあるため、帰りの便に余裕をみたい。",
+    "enriched": true
   },
   {
     "id": "13307",
@@ -978,10 +1009,13 @@
     "region": "関東",
     "population": 1902,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間",
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "島を除けば東京都で唯一の村である。同じ都にあるとは思えない場所を探して写真に撮る",
+    "accessTips": "鉄道駅はなく、武蔵五日市駅からのバスで入る。本数は限られ、奥へ行くほど便が少ない。",
+    "enriched": true
   },
   {
     "id": "13402",
@@ -1086,10 +1120,12 @@
     "region": "関東",
     "population": 7502,
     "rarity": "SR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間"
+    ],
+    "uniqueMission": "石灰岩の採掘で形が変わった山がそびえる町である。削られた面が見える場所に立つ",
+    "accessTips": "西武秩父線の駅がある。駅から山が正面に見える。山側へ入る道はバスの本数が限られる。",
+    "enriched": true
   },
   {
     "id": "12441",
@@ -1098,10 +1134,13 @@
     "region": "関東",
     "population": 7810,
     "rarity": "SR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "城下町",
+      "山間"
+    ],
+    "uniqueMission": "かつての城下町である。小さな鉄道の駅から城跡まで歩いて、町の広さを足で測る",
+    "accessTips": "いすみ鉄道の駅がある。本数は少ないので時刻を先に確かめたい。町域は山がちで奥へは車が要る。",
+    "enriched": true
   },
   {
     "id": "12422",
@@ -1206,10 +1245,13 @@
     "region": "関東",
     "population": 16588,
     "rarity": "R",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間",
+      "温泉あり"
+    ],
+    "uniqueMission": "利根川の源に近い町である。川の水に手を入れて、下流で見る利根川との違いを確かめる",
+    "accessTips": "上越線の駅があり新幹線も通る。温泉街と山側は離れており、奥はバスの本数が限られる。冬は積雪が多い。",
+    "enriched": true
   },
   {
     "id": "08546",
@@ -1218,10 +1260,12 @@
     "region": "関東",
     "population": 24675,
     "rarity": "R",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "利根川の河岸として栄えた町である。かつて船が着いた場所を訪ね、いまの川の様子と比べる",
+    "accessTips": "鉄道駅はなく、古河方面からのバスか車で入る。町内は平坦で自転車でも回れる。",
+    "enriched": true
   },
   {
     "id": "09211",
@@ -1327,9 +1371,9 @@
     "population": 91179,
     "rarity": "N",
     "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "uniqueMission": "鳥ではないものを焼く「やきとり」で知られる市である。何の肉なのかを店で確かめて食べる",
+    "accessTips": "東武東上線の駅がある。駅前から中心部は歩ける。郊外の丘陵へはバスの本数が限られる。",
+    "enriched": true
   },
   {
     "id": "08232",
@@ -1338,10 +1382,13 @@
     "region": "関東",
     "population": 93414,
     "rarity": "N",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い",
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "工業地帯と砂浜が隣り合う市である。その両方が同時に見える場所を探す",
+    "accessTips": "鉄道駅はなく、高速バスか車で入る。市域は南北に長く、移動には車が要る。",
+    "enriched": true
   },
   {
     "id": "10212",
@@ -1446,10 +1493,14 @@
     "region": "中部",
     "population": 364,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間",
+      "鉄道駅なし",
+      "温泉あり"
+    ],
+    "uniqueMission": "人口が数百人の村である。すれ違う人の数を数えて、村の人口と比べてみる",
+    "accessTips": "鉄道駅はなく、飯田方面からの車が前提。峠道を越えて入るため冬季は路面に注意が要る。",
+    "enriched": true
   },
   {
     "id": "20410",
@@ -1458,10 +1509,13 @@
     "region": "中部",
     "population": 789,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間",
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "矢作川の源流がある村である。杉の産地でもあるので、木の香りがする場所を探す",
+    "accessTips": "鉄道駅はなく、車で峠を越えて入る。県境に近く公共交通の便は限られる。",
+    "enriched": true
   },
   {
     "id": "15586",
@@ -1566,10 +1620,13 @@
     "region": "中部",
     "population": 5511,
     "rarity": "SR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間",
+      "温泉あり"
+    ],
+    "uniqueMission": "大井川の上流にある町である。茶の産地なので、この町で摘まれた茶を飲んで帰る",
+    "accessTips": "大井川鉄道の駅がある。本数は少なく、奥の峡谷へはさらにバスか車が要る。",
+    "enriched": true
   },
   {
     "id": "20386",
@@ -1578,10 +1635,13 @@
     "region": "中部",
     "population": 4546,
     "rarity": "SR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間",
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "二つのアルプスに挟まれた村である。両方の山並みが同時に見える場所を探す",
+    "accessTips": "鉄道駅はなく、飯田線の駅からバスか車で入る。谷が深く坂が多い。",
+    "enriched": true
   },
   {
     "id": "16321",
@@ -1686,10 +1746,12 @@
     "region": "中部",
     "population": 28050,
     "rarity": "R",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間"
+    ],
+    "uniqueMission": "富士の伏流水が湧く市である。湧き水に触れて、外の気温との差を確かめる",
+    "accessTips": "富士急行線の駅がある。駅から市街は歩ける。山側はバスの本数が限られる。",
+    "enriched": true
   },
   {
     "id": "20323",
@@ -1698,10 +1760,12 @@
     "region": "中部",
     "population": 16863,
     "rarity": "R",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間"
+    ],
+    "uniqueMission": "浅間山の南の裾に広がる町である。隣の有名な町と何が違うかを歩いて確かめる",
+    "accessTips": "しなの鉄道の駅がある。標高が高く冬は冷えて路面が凍る。山側は車が無難。",
+    "enriched": true
   },
   {
     "id": "23446",
@@ -1807,9 +1871,9 @@
     "population": 34771,
     "rarity": "N",
     "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "uniqueMission": "かつて海だったことを示す化石が出る市である。その証拠を見られる場所を訪ねる",
+    "accessTips": "中央本線の駅がある。駅から中心部は歩ける。窯や郊外の施設へは車かバスが要る。",
+    "enriched": true
   },
   {
     "id": "23447",
@@ -1818,10 +1882,12 @@
     "region": "中部",
     "population": 43315,
     "rarity": "N",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い"
+    ],
+    "uniqueMission": "醸造が続く町である。蔵が並ぶ通りを歩いて、匂いの違いを確かめる",
+    "accessTips": "名鉄とJRの駅がある。駅から蔵のある一帯は歩ける距離にある。",
+    "enriched": true
   },
   {
     "id": "23231",
@@ -1926,10 +1992,12 @@
     "region": "近畿",
     "population": 2578,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間"
+    ],
+    "uniqueMission": "山上に寺院の町が開かれている。宿坊が並ぶ通りを歩き、朝のつとめの音が聞こえるか確かめる",
+    "accessTips": "鉄道とケーブルカーで上がる。山上はバスで移動する。冬は平地より冷えて雪が積もる。",
+    "enriched": true
   },
   {
     "id": "29386",
@@ -1938,10 +2006,14 @@
     "region": "近畿",
     "population": 1297,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間",
+      "鉄道駅なし",
+      "温泉あり"
+    ],
+    "uniqueMission": "村の名が杖に由来すると伝わる。その由来を現地の説明で確かめる",
+    "accessTips": "鉄道駅はなく、榛原方面からバスか車で入る。本数は限られ、山越えの道が多い。",
+    "enriched": true
   },
   {
     "id": "29449",
@@ -2047,9 +2119,9 @@
     "population": 7956,
     "rarity": "SR",
     "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "uniqueMission": "奈良盆地のただ中にある小さな町である。在来の野菜が受け継がれているので探して食べるか買う",
+    "accessTips": "近鉄の駅がある。町域は狭く平坦なので、歩きか自転車で端まで行ける。",
+    "enriched": true
   },
   {
     "id": "25442",
@@ -2059,9 +2131,9 @@
     "population": 6297,
     "rarity": "SR",
     "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "uniqueMission": "湖東三山の一つがある町である。参道の石段を上って、山門から田の広がりを見下ろす",
+    "accessTips": "最寄り駅から離れており、バスか車で入る。平坦な田のなかを進むため目印が少ない。",
+    "enriched": true
   },
   {
     "id": "30392",
@@ -2166,10 +2238,13 @@
     "region": "近畿",
     "population": 15041,
     "rarity": "R",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い",
+      "山間"
+    ],
+    "uniqueMission": "日本で雨の多い土地として知られる市である。雨具を持って出かけ、実際に降るか確かめる",
+    "accessTips": "紀勢本線の駅がある。特急も停まるが本数は限られる。海沿いと山がすぐ接しており坂が多い。",
+    "enriched": true
   },
   {
     "id": "26322",
@@ -2178,10 +2253,12 @@
     "region": "近畿",
     "population": 15078,
     "rarity": "R",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "京都府にありながら鉄道の駅がない町である。人がどう行き来しているかを現地で確かめる",
+    "accessTips": "鉄道駅はなく、京都方面からのバスか車で入る。平坦で自転車でも回れる。",
+    "enriched": true
   },
   {
     "id": "27381",
@@ -2286,10 +2363,12 @@
     "region": "近畿",
     "population": 73890,
     "rarity": "N",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "城下町"
+    ],
+    "uniqueMission": "明智光秀が築いたと伝わる城の城下町である。川と城と町の位置関係を歩いて確かめる",
+    "accessTips": "山陰本線と福知山線の駅があり特急も停まる。市域は広く郊外へはバスか車が要る。",
+    "enriched": true
   },
   {
     "id": "28216",
@@ -2298,10 +2377,12 @@
     "region": "近畿",
     "population": 85820,
     "rarity": "N",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い"
+    ],
+    "uniqueMission": "祝いの謡で名が知られる土地である。その由来となった場所を訪ね、謡の文句を確かめる",
+    "accessTips": "私鉄とJRの駅がある。海側の工業地帯と旧市街は離れており、バスか自転車が便利。",
+    "enriched": true
   },
   {
     "id": "25204",
@@ -2406,10 +2487,13 @@
     "region": "中国",
     "population": 2253,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "離島",
+      "海沿い"
+    ],
+    "uniqueMission": "後鳥羽上皇が流された島である。その縁の場所を訪ね、都からの遠さを体で感じる",
+    "accessTips": "本土からフェリーか高速船で渡る。海況で欠航することがあるため帰りの便に余裕をみたい。島内はバスか車。",
+    "enriched": true
   },
   {
     "id": "31403",
@@ -2418,10 +2502,12 @@
     "region": "中国",
     "population": 2432,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間"
+    ],
+    "uniqueMission": "大山の南の裾にある町である。山から流れ出る水を飲んで、味を覚えて帰る",
+    "accessTips": "伯備線の駅がある。本数は限られ、山側へはさらに車が要る。冬は積雪が深い。",
+    "enriched": true
   },
   {
     "id": "32526",
@@ -2526,10 +2612,13 @@
     "region": "中国",
     "population": 6636,
     "rarity": "SR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "離島",
+      "海沿い"
+    ],
+    "uniqueMission": "橋が架かっていない瀬戸内の島である。フェリーの甲板から島がどう近づくかを見る",
+    "accessTips": "本土や隣島からフェリーで渡る。便の時刻が生活を決めているため、帰りの最終便を先に確かめたい。",
+    "enriched": true
   },
   {
     "id": "31328",
@@ -2538,10 +2627,12 @@
     "region": "中国",
     "population": 5930,
     "rarity": "SR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間"
+    ],
+    "uniqueMission": "杉の産地として知られる町である。木材の匂いがする場所を探して、杉の太さを目で測る",
+    "accessTips": "因美線と智頭急行の駅がある。本数は限られ、山あいの集落へはさらに車が要る。",
+    "enriched": true
   },
   {
     "id": "33623",
@@ -2646,10 +2737,14 @@
     "region": "中国",
     "population": 11903,
     "rarity": "R",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間",
+      "温泉あり",
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "奥に温泉郷を抱える町である。川沿いの湯に入って、山から下りてくる風の冷たさと比べる",
+    "accessTips": "鉄道駅はなく、津山方面からバスか車で入る。奥へ行くほど便が少なく、冬は積雪がある。",
+    "enriched": true
   },
   {
     "id": "35212",
@@ -2658,10 +2753,12 @@
     "region": "中国",
     "population": 28750,
     "rarity": "R",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い"
+    ],
+    "uniqueMission": "白壁の町並みが残る市である。軒先に下がる金魚の形の提灯を探して、由来を確かめる",
+    "accessTips": "山陽本線の駅がある。駅から白壁の一帯は歩ける距離。島へ渡る船も出ている。",
+    "enriched": true
   },
   {
     "id": "31329",
@@ -2766,10 +2863,12 @@
     "region": "中国",
     "population": 30209,
     "rarity": "N",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い"
+    ],
+    "uniqueMission": "釉薬を使わない焼きものの産地である。窯元の並ぶ一帯を歩いて、土の色の違いを見る",
+    "accessTips": "赤穂線の駅がある。窯元の集まる一帯は駅から歩けるが、海側へはさらに移動が要る。",
+    "enriched": true
   },
   {
     "id": "32204",
@@ -2778,10 +2877,12 @@
     "region": "中国",
     "population": 42166,
     "rarity": "N",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い"
+    ],
+    "uniqueMission": "雪舟が晩年を過ごしたと伝わる土地である。その縁の場所を訪ね、庭の造りを見る",
+    "accessTips": "山陰本線と山口線の駅がある。本数は限られる。海沿いと山あいで様子が違い、郊外は車が無難。",
+    "enriched": true
   },
   {
     "id": "33207",
@@ -2886,10 +2987,13 @@
     "region": "四国",
     "population": 2186,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い",
+      "山間"
+    ],
+    "uniqueMission": "清流として知られる川が町を流れる。その川の水に手を入れて、冷たさを確かめる",
+    "accessTips": "土佐くろしお鉄道の駅がある。本数は限られ、川の上流へは車が要る。",
+    "enriched": true
   },
   {
     "id": "36321",
@@ -2898,10 +3002,13 @@
     "region": "四国",
     "population": 2075,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間",
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "徳島県で唯一の村である。すだちの産地なので、実を一つ手に取って香りを確かめる",
+    "accessTips": "鉄道駅はなく、徳島市方面からバスか車で入る。谷に沿って集落が続き、奥は便が少ない。",
+    "enriched": true
   },
   {
     "id": "39301",
@@ -3007,9 +3114,9 @@
     "population": 7989,
     "rarity": "SR",
     "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "uniqueMission": "長い石段で知られる社がある町である。段を数えながら上って、途中で振り返る",
+    "accessTips": "JRと私鉄の駅がある。駅から参道までは歩ける。石段は上りに時間がかかる。",
+    "enriched": true
   },
   {
     "id": "39411",
@@ -3018,10 +3125,13 @@
     "region": "四国",
     "population": 5044,
     "rarity": "SR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "山間",
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "四万十川の源流点がある町である。そこがどれだけ細い流れかを自分の目で確かめる",
+    "accessTips": "鉄道駅はなく、須崎方面から車で入る。源流点へは山道を上がるため余裕をみたい。",
+    "enriched": true
   },
   {
     "id": "39405",
@@ -3126,10 +3236,12 @@
     "region": "四国",
     "population": 15193,
     "rarity": "R",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い"
+    ],
+    "uniqueMission": "江戸期の時計が今も残る市である。その文字盤を見て、動いているか確かめる",
+    "accessTips": "土佐くろしお鉄道の駅がある。駅から旧市街は自転車があると回りやすい。",
+    "enriched": true
   },
   {
     "id": "36402",
@@ -3138,10 +3250,12 @@
     "region": "四国",
     "population": 23818,
     "rarity": "R",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "徳島平野の小さな町である。蓮根の産地なので、畑の水面がどう見えるか確かめる",
+    "accessTips": "鉄道駅はなく、徳島市から自転車やバスで行ける距離。平坦で回りやすい。",
+    "enriched": true
   },
   {
     "id": "36207",
@@ -3246,10 +3360,12 @@
     "region": "四国",
     "population": 43490,
     "rarity": "N",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い"
+    ],
+    "uniqueMission": "四国八十八箇所の札所が複数ある市である。そのうち一つに寄って、納経所の様子を見る",
+    "accessTips": "高徳線と私鉄の駅がある。札所は点在しており、巡るには車か自転車が要る。",
+    "enriched": true
   },
   {
     "id": "38203",
@@ -3258,10 +3374,13 @@
     "region": "四国",
     "population": 65462,
     "rarity": "N",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い",
+      "城下町"
+    ],
+    "uniqueMission": "現存する天守を持つ城がある市である。城山に上って、入り江の形を上から確かめる",
+    "accessTips": "予讃線の駅があり特急も停まる。市街は城を中心にまとまっており歩ける。島や半島へは船か車。",
+    "enriched": true
   },
   {
     "id": "38213",
@@ -3366,10 +3485,13 @@
     "region": "九州沖縄",
     "population": 1205,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "離島",
+      "海沿い"
+    ],
+    "uniqueMission": "沖縄で最も北にある有人の島である。島の北端に立って、その先に何も無いことを確かめる",
+    "accessTips": "運天港からフェリーで渡る。便は限られ海況で欠航することがあるため、帰りに余裕をみたい。",
+    "enriched": true
   },
   {
     "id": "46303",
@@ -3378,10 +3500,13 @@
     "region": "九州沖縄",
     "population": 356,
     "rarity": "SSR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "離島",
+      "海沿い"
+    ],
+    "uniqueMission": "三つの島からなる村である。どの島に渡るかを決めて、船の時刻から旅程を組む",
+    "accessTips": "鹿児島港からの村営船で渡る。便は少なく海況に左右されるため、滞在が延びる前提で計画したい。",
+    "enriched": true
   },
   {
     "id": "40609",
@@ -3486,10 +3611,13 @@
     "region": "九州沖縄",
     "population": 6945,
     "rarity": "SR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "離島",
+      "海沿い"
+    ],
+    "uniqueMission": "紬の織物が伝わる島である。織り目を間近で見て、糸の細さを確かめる",
+    "accessTips": "那覇から飛行機かフェリーで渡る。島内はバスの本数が少なくレンタカーが前提になる。",
+    "enriched": true
   },
   {
     "id": "46490",
@@ -3498,10 +3626,13 @@
     "region": "九州沖縄",
     "population": 5972,
     "rarity": "SR",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い",
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "錦江湾に面した町である。湾の向こうに見える山の形を確かめる",
+    "accessTips": "鉄道駅はなく、鹿屋方面から車かバスで入る。半島の南部で便は限られる。",
+    "enriched": true
   },
   {
     "id": "47306",
@@ -3606,10 +3737,13 @@
     "region": "九州沖縄",
     "population": 26430,
     "rarity": "R",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "離島",
+      "海沿い"
+    ],
+    "uniqueMission": "国境の島である。天気の良い日に対岸の国が見えるか、北端の展望所で確かめる",
+    "accessTips": "福岡や長崎から飛行機かフェリーで渡る。島は南北に長く、移動にはレンタカーが要る。",
+    "enriched": true
   },
   {
     "id": "43212",
@@ -3618,10 +3752,14 @@
     "region": "九州沖縄",
     "population": 22851,
     "rarity": "R",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "離島",
+      "海沿い",
+      "鉄道駅なし"
+    ],
+    "uniqueMission": "島を橋で結んだ市である。橋の上から海の色が変わる境目を探す",
+    "accessTips": "鉄道駅はなく、熊本方面から車かバスで入る。島をまたぐため移動距離が長い。",
+    "enriched": true
   },
   {
     "id": "44214",
@@ -3726,10 +3864,13 @@
     "region": "九州沖縄",
     "population": 81132,
     "rarity": "N",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "城下町",
+      "海沿い"
+    ],
+    "uniqueMission": "城下町であり、唐揚げの店が多い市でもある。城を見てから唐揚げを食べ、両方を一日に収める",
+    "accessTips": "日豊本線の駅があり特急も停まる。城と旧市街は駅から歩ける。渓谷など山側は車が要る。",
+    "enriched": true
   },
   {
     "id": "40229",
@@ -3738,10 +3879,12 @@
     "region": "九州沖縄",
     "population": 33609,
     "rarity": "N",
-    "tags": [],
-    "uniqueMission": "",
-    "accessTips": "",
-    "enriched": false
+    "tags": [
+      "海沿い"
+    ],
+    "uniqueMission": "平成の合併でできた市である。合併前の町の境目がどこか、地元の人に聞いてみる",
+    "accessTips": "鹿児島本線の駅がある。市域は東西に広く、山側へはバスか車が要る。",
+    "enriched": true
   },
   {
     "id": "46223",
