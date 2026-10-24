@@ -5,6 +5,7 @@ export const KEYS = {
   profile: 'tabi-gacha:profile',
   pulls: 'tabi-gacha:pulls',
   demo: 'tabi-gacha:demo',
+  photoNotice: 'tabi-gacha:photoNoticeSeen',
 } as const
 
 /**
@@ -84,6 +85,7 @@ export function resetIfSchemaChanged(): boolean {
     removeItem(KEYS.profile)
     removeItem(KEYS.pulls)
     removeItem(KEYS.demo)
+    removeItem(KEYS.photoNotice)
   }
   setItem(KEYS.version, String(SCHEMA_VERSION))
   return !isFirstRun

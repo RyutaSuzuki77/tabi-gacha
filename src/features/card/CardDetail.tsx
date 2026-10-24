@@ -3,6 +3,7 @@ import type { GenericMission, Pull, Town } from '../../domain/types'
 import { RarityBadge } from '../../ui/RarityBadge'
 import { AccessSection } from './AccessSection'
 import { MissionList } from './MissionList'
+import { PhotoSection } from './PhotoSection'
 
 export function CardDetail({
   pull,
@@ -50,6 +51,8 @@ export function CardDetail({
         </section>
 
         <AccessSection town={town} fakeOrigin={fakeOrigin} />
+
+        <PhotoSection pullId={pull.id} />
       </div>
     </article>
   )
