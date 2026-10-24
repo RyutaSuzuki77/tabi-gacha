@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { DrawMode } from './domain/pool'
 import type { Pull } from './domain/types'
 import { useGame } from './state/useGame'
+import { CardDetail } from './features/card/CardDetail'
 import { HomeScreen } from './features/gacha/HomeScreen'
 import { Layout } from './ui/Layout'
 import { TabBar, type TabId } from './ui/TabBar'
@@ -36,23 +37,22 @@ export default function App() {
         )}
 
         {game.status === 'ready' && tab === 'gacha' && (
-          <>
+          lastPull && game.townById(lastPull.townId) ? (
+            <CardDetail
+              pull={game.pulls.find((p) => p.id === lastPull.id) ?? lastPull}
+              town={game.townById(lastPull.townId)!}
+              generics={game.generics}
+              onToggle={(index, done) => game.toggleMission(lastPull.id, index, done)}
+              onBack={() => setLastPull(null)}
+            />
+          ) : (
             <HomeScreen
               canDraw={game.canDrawNow}
               rankTitle={game.rank.title}
               total={game.total}
               onDraw={handleDraw}
             />
-            {lastPull && (
-              <pre className="mt-4 overflow-x-auto rounded bg-stone-100 p-2 text-xs">
-                {JSON.stringify(
-                  { town: game.townById(lastPull.townId)?.name, missions: lastPull.missions.length },
-                  null,
-                  2,
-                )}
-              </pre>
-            )}
-          </>
+          )
         )}
 
         {game.status === 'ready' && tab === 'collection' && (
