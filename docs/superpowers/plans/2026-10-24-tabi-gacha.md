@@ -25,6 +25,8 @@
 - **ガチャは1日1回・引き直し不可。** ただしデモモードで解除できる（仕様 4.5 / 12）
 - **`member_id`** を `profile` に持ち、`pulls` から参照する。`photos` には持たせない（仕様 10.1）
 - **出典表記は義務。** オープンデータの利用規約の条件であり、省略できない。表記は `src/data/sources.ts` の1か所にまとめ、プロフィール画面がそれを読む（仕様 11.5）
+- **AI生成部分が公的機関の見解でないことを明示する。** 政府の利用規約は「国が作成したかのように見せる」ことを禁じている。ミッションと行き方のコツはAI生成であると出典表記の中に書く（仕様 11.5）
+- **Googleのロゴを使わない。** リンクテキスト内へのインライン使用は禁止。経路ボタンは文字のみにする（仕様 11.5.1）
 - **実行時に外部APIを呼ばない。** Anthropic SDK を依存に追加しない。APIキーを扱うコードを書かない（仕様 11.2 / 15）
 - **サーバーサイド処理を書かない。** 完全な静的サイトとしてVercelにデプロイする（仕様 3 / 15）
 - **現在地の注釈に「端末の外に一切出ない」と書いてはならない。** 経路を開く際にGoogleマップのURLへ出発地として渡るため事実に反する（仕様 6.4）
@@ -2394,6 +2396,19 @@ code,prefecture,name,population,lat,lng
 
 2つの出典をまたぐ場合は自治体コードで結合する。手で整えて構わない（この工程の再現性より、正しいデータが入っていることを優先する）。
 
+- [ ] **Step 1.2: ダウンロードするデータセットのライセンスを個別に確認する**
+
+**この確認だけは機械化できない。** 国土数値情報はデータセットごとにライセンスが異なり、「オープンデータ（CC BY 4.0）一部制限」「商用可／非商用」などの個別表示があるものや、測量法に基づく承認が必要なものが存在する。
+
+落とす各データセットのページで次を確認し、`scripts/raw/README.md` に書き写す：
+
+1. ライセンスの表示（PDL1.0 / CC BY 4.0 / 商用可 / 非商用 のいずれか）
+2. 求められている**出典表記の形式**（そのまま転記する）
+3. **改変した旨の明記**が必要か
+4. 申請・承認が必要と書かれていないか
+
+求められている形式が計画の文面と違っていた場合は、**規約側の形式に合わせる**（`src/data/sources.ts` を直す）。
+
 - [ ] **Step 1.5: 出典を記録する**
 
 `scripts/raw/README.md` を書く。**年次を必ず入れる**（検証スクリプトでは検出できない情報なので、ここが唯一の記録になる）：
@@ -2417,6 +2432,12 @@ code,prefecture,name,population,lat,lng
 - 取得元URL：
 - 取得日：2026-10-24
 
+## ライセンス
+- 人口データ：（例）政府標準利用規約（第2.0版）／CC BY 4.0 互換
+- 座標データ：（例）PDL1.0（改変の明記が必要）
+- 求められている出典表記の形式：（規約ページから転記）
+- 申請・承認の要否：（例）不要
+
 ## 加工した内容
 - 自治体コードで2つのデータを結合
 - 人口10万人以上、名称が「区」で終わる行、人口100人未満の行を除外
@@ -2426,7 +2447,13 @@ code,prefecture,name,population,lat,lng
 続けて `src/data/sources.ts` を作る。**アプリに表示する文面はここだけに持つ**：
 
 ```ts
-export type DataSource = { label: string; publisher: string; url: string }
+export type DataSource = {
+  label: string
+  publisher: string
+  url: string
+  /** 改変した旨の明記が必要なライセンス（PDL1.0 等）の場合に true */
+  noteModified: boolean
+}
 
 /**
  * アプリ内に表示する出典（仕様 11.5）。
@@ -2434,19 +2461,28 @@ export type DataSource = { label: string; publisher: string; url: string }
  */
 export const DATA_SOURCES: DataSource[] = [
   {
-    label: '住民基本台帳に基づく人口、人口動態及び世帯数',
+    label: '政府統計の総合窓口（e-Stat）',
     publisher: '総務省',
     url: '',
+    noteModified: false,
   },
   {
     label: '国土数値情報（市区町村役場等及び公的集会施設）',
     publisher: '国土交通省',
     url: '',
+    noteModified: true,
   },
 ]
+
+/**
+ * AI生成部分の断り書き。政府の利用規約は「国が作成したかのように見せる」ことを
+ * 禁じているため、統計データとAI生成文を同じ画面に出す本アプリでは必須（仕様 11.5）。
+ */
+export const AI_DISCLAIMER =
+  'ミッションと行き方のコツは、上記の統計をもとにAIが生成した文章です。公的機関の見解ではありません。'
 ```
 
-> `url` は取得元のページURLを入れる。空のままにしない。
+> `url` は取得元のページURLを入れる。空のままにしない。`noteModified` が `true` の出典は「〜をもとに作成」の形で表示する（PDL1.0 が改変の明記を求めているため）。
 
 - [ ] **Step 2: 骨格を生成する**
 
@@ -3779,7 +3815,7 @@ git commit -m "feat(collection): カード一覧と並べ替え（カード詳�
 ```tsx
 import type { ReactNode } from 'react'
 import { RANKS, rankFor } from '../../domain/rank'
-import { DATA_SOURCES } from '../../data/sources'
+import { AI_DISCLAIMER, DATA_SOURCES } from '../../data/sources'
 import { isStorageAvailable } from '../../storage/schema'
 
 export function ProfileScreen({
@@ -3840,11 +3876,10 @@ export function ProfileScreen({
       {/* 出典表記。オープンデータの利用規約上の義務なので省略しない（仕様 11.5） */}
       <section className="text-xs leading-relaxed text-stone-500">
         <h3 className="mb-1 font-bold text-stone-600">データの出典</h3>
-        <p>この町のデータは、次の統計を加工して作成しています。</p>
+        <p>町名・人口・位置のデータは、次の統計を加工して作成しています。</p>
         <ul className="mt-1 space-y-0.5">
           {DATA_SOURCES.map((source) => (
             <li key={source.label}>
-              {source.publisher}「
               {source.url ? (
                 <a href={source.url} target="_blank" rel="noreferrer" className="underline">
                   {source.label}
@@ -3852,10 +3887,12 @@ export function ProfileScreen({
               ) : (
                 source.label
               )}
-              」
+              （{source.publisher}）
+              {source.noteModified && 'をもとに作成'}
             </li>
           ))}
         </ul>
+        <p className="mt-2">{AI_DISCLAIMER}</p>
       </section>
 
       {demoPanel}
@@ -3882,6 +3919,8 @@ export function ProfileScreen({
 4. データ保存と現在地の注釈が両方出ている
 5. 注釈に「端末の外に一切出ない」という表現が**無い**ことを目で確認する（仕様 6.4）
 6. 「データの出典」が出ており、**各データセットのURLがリンクになっている**（`url` が空だとリンクにならないので、空のまま残っていないかの確認も兼ねる）
+7. 出典の下に「ミッションと行き方のコツは…AIが生成した文章です。公的機関の見解ではありません。」が出ている（仕様 11.5）
+8. 経路ボタンに**Googleのロゴを使っていない**（文字だけであること。仕様 11.5.1）
 
 - [ ] **Step 4: Commit**
 
