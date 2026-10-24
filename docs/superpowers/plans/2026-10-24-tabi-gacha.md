@@ -15,6 +15,7 @@
 仕様書由来のプロジェクト全体の制約。**各タスクの要件はこの節を暗黙に含む。**
 
 - **出題プールは人口10万人未満の市町村のみ。** 10万人以上はデータ段階で除外する（仕様 4.1）
+- **人口上限だけでは足りない。** 名称が「区」で終わる行（東京23区・政令市の行政区）と、人口100人未満の行（北方領土の村など）もデータ段階で除外する（仕様 4.1）
 - **レア度の人口閾値**：`SSR` < 3,000 ／ `SR` 3,000〜9,999 ／ `R` 10,000〜29,999 ／ `N` 30,000〜99,999（仕様 4.2）
 - **排出率**：`SSR` 8% ／ `SR` 22% ／ `R` 35% ／ `N` 35%（合計100）（仕様 4.2）
 - **地方区分は8つ**：`北海道` `東北` `関東` `中部` `近畿` `中国` `四国` `九州沖縄`（仕様 4.4）
@@ -1664,6 +1665,8 @@ git commit -m "feat(storage): profile と pulls の永続化層（member_id・�
   - `regionForPrefecture(prefecture: string): Region | null`
   - `parsePopulation(raw: string): number | null`
   - `parseCsv(text: string): Record<string, string>[]`
+  - `isExcludedName(name: string): boolean`
+  - `const MIN_POPULATION = 100`
   - `buildSkeletonTown(row: { code: string; prefecture: string; name: string; population: string; lat: string; lng: string }): Town | null`
   - `curate(towns: Town[], perRegionPerRarity: number, rng: Rng): Town[]`
 
@@ -1785,6 +1788,26 @@ describe('buildSkeletonTown', () => {
     expect(buildSkeletonTown({ ...row, population: '1,973,000' })).toBeNull()
   })
 
+  it('特別区・行政区は人口が10万人未満でも除外する', () => {
+    // 千代田区は人口10万人未満だが、都心の一区画なので出してはならない
+    expect(buildSkeletonTown({
+      ...row, prefecture: '東京都', name: '千代田区', population: '66,000',
+    })).toBeNull()
+    expect(buildSkeletonTown({
+      ...row, prefecture: '大阪府', name: '浪速区', population: '74,000',
+    })).toBeNull()
+  })
+
+  it('「区」で終わらない町村は除外しない', () => {
+    expect(buildSkeletonTown({ ...row, name: '奥出雲町' })).not.toBeNull()
+  })
+
+  it('人口100人未満は除外する（人口0の村が一覧に含まれることがある）', () => {
+    expect(buildSkeletonTown({ ...row, population: '0' })).toBeNull()
+    expect(buildSkeletonTown({ ...row, population: '99' })).toBeNull()
+    expect(buildSkeletonTown({ ...row, population: '100' })).not.toBeNull()
+  })
+
   it('人口・座標・都道府県が読めない行は null', () => {
     expect(buildSkeletonTown({ ...row, population: '不明' })).toBeNull()
     expect(buildSkeletonTown({ ...row, lat: '' })).toBeNull()
@@ -1861,6 +1884,18 @@ export function regionForPrefecture(prefecture: string): Region | null {
   return PREFECTURE_TO_REGION[prefecture.trim()] ?? null
 }
 
+/** 人口0のまま一覧に残る自治体（北方領土の村など）を落とすための下限 */
+export const MIN_POPULATION = 100
+
+/**
+ * 出題対象から外す名称か。
+ * 市町村で「区」で終わるのは特別区（東京23区）と政令市の行政区だけなので、
+ * この条件だけで両方を確実に落とせる（仕様 4.1）。
+ */
+export function isExcludedName(name: string): boolean {
+  return name.trim().endsWith('区')
+}
+
 export function parsePopulation(raw: string): number | null {
   const normalized = raw.trim().replace(/,/g, '')
   if (!/^\d+$/.test(normalized)) return null
@@ -1893,8 +1928,11 @@ export function buildSkeletonTown(row: {
   const region = regionForPrefecture(row.prefecture)
   if (!region) return null
 
+  if (isExcludedName(row.name)) return null // 特別区・行政区
+
   const population = parsePopulation(row.population)
   if (population === null) return null
+  if (population < MIN_POPULATION) return null // 人口0のまま残る自治体
 
   const rarity = rarityForPopulation(population)
   if (!rarity) return null // 人口10万人以上は出題対象外
@@ -2030,7 +2068,11 @@ git commit -m "feat(scripts): 町データ骨格の生成（都道府県→地�
 既存の `REGIONS` の下に追記する：
 
 ```ts
-/** 汎用ミッションの成立条件に使える語彙。これ以外のタグは検証で弾く（仕様 5.2） */
+/**
+ * 汎用ミッションの成立条件に使える語彙。これ以外のタグは検証で弾く（仕様 5.2）。
+ * タグは「その町に固定の性質」に限る。季節で変わるもの（積雪など）は入れない
+ * ―― 夏に引いた人に冬のミッションが出てしまうため。季節の事情は accessTips 側に書く。
+ */
 export const TOWN_TAGS = [
   '海沿い',
   '山間',
@@ -2038,7 +2080,6 @@ export const TOWN_TAGS = [
   '鉄道駅なし',
   '離島',
   '城下町',
-  '豪雪',
   '湖畔',
 ] as const
 ```
@@ -2106,6 +2147,14 @@ describe('validateTowns', () => {
 
   it('人口10万人以上を検出する', () => {
     expect(fieldsOf(validateTowns([town({ population: 100000 })], GENERICS))).toContain('population')
+  })
+
+  it('特別区・行政区を検出する', () => {
+    expect(fieldsOf(validateTowns([town({ name: '千代田区' })], GENERICS))).toContain('name')
+  })
+
+  it('人口が小さすぎる行を検出する', () => {
+    expect(fieldsOf(validateTowns([town({ population: 0, rarity: 'SSR' })], GENERICS))).toContain('population')
   })
 
   it('人口とレア度の不整合を検出する', () => {
@@ -2209,6 +2258,7 @@ export function validateTowns(towns: unknown, genericMissions: GenericMission[])
     else seenIds.add(town.id)
 
     if (typeof town?.name !== 'string' || town.name === '') push('name', '町名が空')
+    else if (town.name.endsWith('区')) push('name', `特別区・行政区は出題対象外: ${town.name}`)
     if (typeof town?.prefecture !== 'string' || town.prefecture === '') push('prefecture', '都道府県が空')
     if (!REGIONS.includes(town?.region as Region)) push('region', `地方が不正: ${String(town?.region)}`)
 
@@ -2216,6 +2266,8 @@ export function validateTowns(towns: unknown, genericMissions: GenericMission[])
       push('population', '人口が数値でない')
     } else if (town.population >= MAX_POPULATION) {
       push('population', `人口10万人以上は出題対象外: ${town.population}`)
+    } else if (town.population < 100) {
+      push('population', `人口が小さすぎる（実在しない自治体の可能性）: ${town.population}`)
     } else if (rarityForPopulation(town.population) !== town.rarity) {
       push('rarity', `人口 ${town.population} に対してレア度 ${town.rarity} が不整合`)
     }
@@ -2357,10 +2409,10 @@ npx tsx scripts/buildSkeleton.ts 10
   { "id": "g-shop", "text": "名前を知らない店に入って、何か一つ買う", "requiredTags": [] },
   { "id": "g-walk", "text": "地図を見ずに15分歩いて、気になったものを写真に撮る", "requiredTags": [] },
   { "id": "g-eat", "text": "その土地のもので昼食をとる", "requiredTags": [] },
-  { "id": "g-sea", "text": "海が見える場所まで行って、10分なにもしない", "requiredTags": ["海沿い"] },
-  { "id": "g-onsen", "text": "温泉に入って、湯の匂いを覚えて帰る", "requiredTags": ["温泉あり"] },
+  { "id": "g-sea", "text": "海が見える場所まで行って、黄昏る", "requiredTags": ["海沿い"] },
+  { "id": "g-onsen", "text": "温泉に入って、疲れを取る", "requiredTags": ["温泉あり"] },
   { "id": "g-mountain", "text": "いちばん高く見える場所まで登ってみる", "requiredTags": ["山間"] },
-  { "id": "g-nostation", "text": "鉄道がない町の交通手段を、現地の人に教わる", "requiredTags": ["鉄道駅なし"] }
+  { "id": "g-nostation", "text": "路線バスに乗って、ひとつ先の集落まで行く", "requiredTags": ["鉄道駅なし"] }
 ]
 ```
 
@@ -2397,7 +2449,7 @@ npx tsx scripts/buildSkeleton.ts 10
 
 次の語彙からのみ、当てはまるものを選ぶ（0個でもよい）。重複させない。
 
-`海沿い` `山間` `温泉あり` `鉄道駅なし` `離島` `城下町` `豪雪` `湖畔`
+`海沿い` `山間` `温泉あり` `鉄道駅なし` `離島` `城下町` `湖畔`
 
 ## 出力
 
