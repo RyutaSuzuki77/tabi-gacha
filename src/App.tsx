@@ -5,6 +5,7 @@ import { useGame } from './state/useGame'
 import { CardDetail } from './features/card/CardDetail'
 import { CollectionScreen } from './features/collection/CollectionScreen'
 import { HomeScreen } from './features/gacha/HomeScreen'
+import { DemoModePanel } from './features/profile/DemoModePanel'
 import { ProfileScreen } from './features/profile/ProfileScreen'
 import { Layout } from './ui/Layout'
 import { TabBar, type TabId } from './ui/TabBar'
@@ -23,6 +24,9 @@ export default function App() {
     setSelectedPull(null)
     setTab(next)
   }
+
+  const demoActive =
+    game.demo.unlimited || game.demo.forcedRarity !== null || game.demo.fakeOrigin !== null
 
   // チェックの変更を反映した最新の pull を表示する（selectedPull は古いスナップショット）
   const current = selectedPull
@@ -66,6 +70,7 @@ export default function App() {
                   canDraw={game.canDrawNow}
                   rankTitle={game.rank.title}
                   total={game.total}
+                  demoActive={demoActive}
                   onDraw={handleDraw}
                 />
               )}
@@ -77,7 +82,11 @@ export default function App() {
                 />
               )}
               {tab === 'profile' && (
-                <ProfileScreen total={game.total} pullCount={game.pulls.length} demoPanel={null} />
+                <ProfileScreen
+                  total={game.total}
+                  pullCount={game.pulls.length}
+                  demoPanel={<DemoModePanel demo={game.demo} onChange={game.updateDemo} />}
+                />
               )}
             </>
           )

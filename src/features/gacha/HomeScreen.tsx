@@ -7,11 +7,13 @@ export function HomeScreen({
   canDraw,
   rankTitle,
   total,
+  demoActive,
   onDraw,
 }: {
   canDraw: boolean
   rankTitle: string
   total: number
+  demoActive: boolean
   onDraw: (mode: DrawMode) => void
 }) {
   const [region, setRegion] = useState<Region | 'all'>('all')
@@ -46,6 +48,10 @@ export function HomeScreen({
         <span className="mx-2">·</span>
         {rankTitle}（{total}pt）
       </p>
+
+      {demoActive && (
+        <p className="mt-2 text-center text-xs text-amber-700">デモモードが有効です</p>
+      )}
 
       <PoolNotice />
     </div>
