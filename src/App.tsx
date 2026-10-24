@@ -42,6 +42,7 @@ export default function App() {
               pull={game.pulls.find((p) => p.id === lastPull.id) ?? lastPull}
               town={game.townById(lastPull.townId)!}
               generics={game.generics}
+              fakeOrigin={game.demo.fakeOrigin}
               onToggle={(index, done) => game.toggleMission(lastPull.id, index, done)}
               onBack={() => setLastPull(null)}
             />

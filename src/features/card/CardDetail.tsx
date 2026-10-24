@@ -1,18 +1,21 @@
 import { pointsForPull } from '../../domain/points'
 import type { GenericMission, Pull, Town } from '../../domain/types'
 import { RarityBadge } from '../../ui/RarityBadge'
+import { AccessSection } from './AccessSection'
 import { MissionList } from './MissionList'
 
 export function CardDetail({
   pull,
   town,
   generics,
+  fakeOrigin,
   onToggle,
   onBack,
 }: {
   pull: Pull
   town: Town
   generics: GenericMission[]
+  fakeOrigin: { lat: number; lng: number } | null
   onToggle: (index: number, done: boolean) => void
   onBack: () => void
 }) {
@@ -45,6 +48,8 @@ export function CardDetail({
           <MissionList pull={pull} town={town} generics={generics} onToggle={onToggle} />
           <p className="mt-2 text-xs text-stone-500">獲得 {earned}pt</p>
         </section>
+
+        <AccessSection town={town} fakeOrigin={fakeOrigin} />
       </div>
     </article>
   )
