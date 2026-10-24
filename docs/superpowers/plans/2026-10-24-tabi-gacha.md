@@ -26,7 +26,7 @@
 - **実行時に外部APIを呼ばない。** Anthropic SDK を依存に追加しない。APIキーを扱うコードを書かない（仕様 11.2 / 15）
 - **サーバーサイド処理を書かない。** 完全な静的サイトとしてVercelにデプロイする（仕様 3 / 15）
 - **現在地の注釈に「端末の外に一切出ない」と書いてはならない。** 経路を開く際にGoogleマップのURLへ出発地として渡るため事実に反する（仕様 6.4）
-- **モバイル幅を基準に作る。** PCではモバイル幅のコンテナを中央配置する（仕様 3）
+- **レスポンシブ対応する**（仕様 3 / 9.1）。ナビゲーションは狭い画面では下部固定、中間以上では上部の横並び。コレクションの列数とカード詳細の段組みを幅で変える。**全幅で共通**：本文の行長を制限する／タップ対象は44px以上／横スクロールを発生させない。確認する幅は **375px / 768px / 1280px**
 - **UIの自動テストは書かない。** テストは `src/domain/`・`src/storage/`・`src/maps/`・`scripts/` の純ロジックに限る。画面は手動確認（仕様 14）
 
 ## Review Focus
@@ -53,9 +53,9 @@
 | `postcss.config.js` / `src/index.css` | Tailwindの読み込み |
 | `index.html` | タイトル `旅ガチャ`、`viewport` |
 | `src/main.tsx` | Reactのマウントのみ |
-| `src/App.tsx` | 下部タブによる画面切り替えのみ。ロジックを持たない |
-| `src/ui/TabBar.tsx` | 「ガチャ / コレクション / プロフィール」のタブ |
-| `src/ui/Layout.tsx` | モバイル幅コンテナの中央配置 |
+| `src/App.tsx` | タブによる画面切り替えのみ。ロジックを持たない |
+| `src/ui/TabBar.tsx` | 「ガチャ / コレクション / プロフィール」のタブ。狭い画面では下部固定、中間以上では上部横並び |
+| `src/ui/Layout.tsx` | 外枠。広い画面では最大幅で中央に寄せる |
 
 **ドメイン（純関数のみ。副作用・DOM・ストレージに触れない）**
 
@@ -127,7 +127,7 @@
 
 **Interfaces:**
 - Consumes: なし
-- Produces: `Layout`（`{children}` を受け取りモバイル幅で中央配置する）、`TabBar`（`{active: TabId, onChange: (t: TabId) => void}`）、`type TabId = 'gacha' | 'collection' | 'profile'`（`src/ui/TabBar.tsx` が export する）
+- Produces: `Layout`（`{children}` を受け取り、広い画面では最大幅で中央に寄せる）、`TabBar`（`{active: TabId, onChange: (t: TabId) => void}`。狭い画面では下部固定、中間以上では上部横並び）、`type TabId = 'gacha' | 'collection' | 'profile'`（`src/ui/TabBar.tsx` が export する）
 
 - [ ] **Step 1: Viteプロジェクトを作る**
 
@@ -209,10 +209,11 @@ export default defineConfig({
 ```tsx
 import type { ReactNode } from 'react'
 
+/** 狭い画面では画面幅いっぱい。広い画面では最大幅で中央に寄せる */
 export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-dvh bg-stone-100">
-      <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col bg-white shadow-sm">
+      <div className="mx-auto flex min-h-dvh w-full max-w-5xl flex-col bg-white shadow-sm">
         {children}
       </div>
     </div>
@@ -231,15 +232,26 @@ const TABS: { id: TabId; label: string }[] = [
   { id: 'profile', label: 'プロフィール' },
 ]
 
+/**
+ * 狭い画面では下部に固定（親指が届く位置）。
+ * `md` 以上では静的な上部の横並びに切り替わる（仕様 9.1）。
+ * App 側ではヘッダ領域に置く。固定時は流れから外れるため、そこにあっても下部に出る。
+ */
 export function TabBar({ active, onChange }: { active: TabId; onChange: (t: TabId) => void }) {
   return (
-    <nav className="sticky bottom-0 flex border-t border-stone-200 bg-white">
+    <nav
+      className="fixed inset-x-0 bottom-0 z-10 flex border-t border-stone-200 bg-white
+                 pb-[env(safe-area-inset-bottom,0px)]
+                 md:static md:mt-3 md:gap-2 md:border-b md:border-t-0 md:pb-0"
+    >
       {TABS.map((t) => (
         <button
           key={t.id}
           onClick={() => onChange(t.id)}
-          className={`flex-1 py-3 text-sm ${
-            active === t.id ? 'font-bold text-stone-900' : 'text-stone-400'
+          className={`flex-1 py-4 text-sm md:flex-none md:px-4 md:py-2 ${
+            active === t.id
+              ? 'font-bold text-stone-900 md:border-b-2 md:border-stone-900'
+              : 'text-stone-400'
           }`}
         >
           {t.label}
@@ -249,6 +261,8 @@ export function TabBar({ active, onChange }: { active: TabId; onChange: (t: TabI
   )
 }
 ```
+
+`py-4` はタップ対象を44px以上にするための高さ。`env(safe-area-inset-bottom)` は、ホームバーのある端末で下部タブが隠れないようにするため。
 
 `src/App.tsx`:
 
@@ -261,21 +275,23 @@ export default function App() {
   const [tab, setTab] = useState<TabId>('gacha')
   return (
     <Layout>
-      <header className="px-4 pt-6 pb-2">
+      <header className="px-4 pt-6 md:px-8">
         <h1 className="text-2xl font-bold tracking-tight">旅ガチャ</h1>
+        <TabBar active={tab} onChange={setTab} />
       </header>
-      <main className="flex-1 px-4 pb-4">
+      <main className="flex flex-1 flex-col px-4 pb-24 md:px-8 md:pb-8">
         {tab === 'gacha' && <p className="text-stone-500">ガチャ</p>}
         {tab === 'collection' && <p className="text-stone-500">コレクション</p>}
         {tab === 'profile' && <p className="text-stone-500">プロフィール</p>}
       </main>
-      <TabBar active={tab} onChange={setTab} />
     </Layout>
   )
 }
 ```
 
 `src/main.tsx` が `./index.css` を import していることを確認する（Viteのテンプレートは `App.css` を使うので、不要なら削除して `index.css` に差し替える）。
+
+`main` の `pb-24` は、狭い画面で下部固定のタブが本文の末尾を覆わないための逃げ。`md:pb-8` でタブが上部に移るため不要になる。
 
 - [ ] **Step 7: ビルドとテストの起動を確認する**
 
@@ -292,10 +308,14 @@ npm test
 npm run dev
 ```
 
-ブラウザで開き、次を確認する：
+ブラウザで開き、**開発者ツールで幅を 375px / 768px / 1280px に切り替えて**次を確認する：
+
 1. 上部に「旅ガチャ」が出ている
-2. 下部のタブ3つを押すと本文が「ガチャ」「コレクション」「プロフィール」に切り替わる
-3. ブラウザ幅を広げても本文が画面いっぱいに広がらず、中央のモバイル幅に収まっている
+2. タブ3つを押すと本文が「ガチャ」「コレクション」「プロフィール」に切り替わる
+3. **375px**：タブが画面下部に固定され、スクロールしても下に残る。本文の末尾がタブに隠れない
+4. **768px / 1280px**：タブがタイトルの下（上部）に横並びで出て、下部には何もない
+5. **1280px**：外枠が画面いっぱいに広がらず、最大幅で中央に寄っている
+6. どの幅でも横スクロールが出ない
 
 - [ ] **Step 9: Commit**
 
@@ -2768,7 +2788,7 @@ export function HomeScreen({
   const mode: DrawMode = region === 'all' ? { kind: 'nationwide' } : { kind: 'region', region }
 
   return (
-    <div className="flex flex-1 flex-col">
+    <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
       <label className="mb-6 block">
         <span className="mb-1 block text-xs text-stone-500">どこから引く</span>
         <select
@@ -2826,11 +2846,12 @@ export default function App() {
 
   return (
     <Layout>
-      <header className="px-4 pt-6 pb-2">
+      <header className="px-4 pt-6 md:px-8">
         <h1 className="text-2xl font-bold tracking-tight">旅ガチャ</h1>
+        <TabBar active={tab} onChange={setTab} />
       </header>
 
-      <main className="flex flex-1 flex-col px-4 pb-4">
+      <main className="flex flex-1 flex-col px-4 pb-24 md:px-8 md:pb-8">
         {game.wasReset && (
           <p className="mb-4 rounded-lg bg-amber-50 p-3 text-xs text-amber-800">
             保存形式が変わったため、これまでのデータを初期化しました。
@@ -2869,14 +2890,14 @@ export default function App() {
           <p className="text-stone-400">プロフィール（Task 15）</p>
         )}
       </main>
-
-      <TabBar active={tab} onChange={setTab} />
     </Layout>
   )
 }
 ```
 
 > 引いた結果の `pre` 表示は Task 12 でカード詳細に置き換える足場。Task 12 の冒頭で削除する。
+
+`HomeScreen` を `mx-auto max-w-md` で包んでいるのは、広い画面でガチャボタンと注釈が横に伸び切らないようにするため（仕様 9.1「本文の行長を制限する」）。
 
 - [ ] **Step 10: 手動確認する**
 
@@ -2889,6 +2910,7 @@ npm run dev
 3. ブラウザのリロード後も引けないまま（`localStorage` に残っている）
 4. 地方を選んで引くと、その地方の町が出る（開発中は `localStorage` を消して繰り返す）
 5. 注釈の1行が常時見えており、押すとレア度表まで開く
+6. 幅 1280px でガチャボタンと注釈が横に伸び切らず、中央に収まっている
 
 - [ ] **Step 11: Commit**
 
@@ -3083,11 +3105,15 @@ export function CardDetail({
         ))}
       </p>
 
-      <section className="mt-6">
-        <h3 className="mb-2 text-sm font-bold">ミッション</h3>
-        <MissionList pull={pull} town={town} generics={generics} onToggle={onToggle} />
-        <p className="mt-2 text-xs text-stone-500">獲得 {earned}pt</p>
-      </section>
+      {/* 広い画面では「ミッション」と「行き方＋写真」を左右に並べる（仕様 9.1）。
+          Task 13 の AccessSection と Task 16 の PhotoSection をこの中に足す */}
+      <div className="mt-6 grid gap-6 lg:grid-cols-2 lg:gap-8">
+        <section>
+          <h3 className="mb-2 text-sm font-bold">ミッション</h3>
+          <MissionList pull={pull} town={town} generics={generics} onToggle={onToggle} />
+          <p className="mt-2 text-xs text-stone-500">獲得 {earned}pt</p>
+        </section>
+      </div>
     </article>
   )
 }
@@ -3130,6 +3156,7 @@ Task 11 で置いた `pre` のデバッグ表示を削除し、`lastPull` があ
 4. チェックを外すとポイントが戻る
 5. 「戻る」でホームに帰り、ホームの累計ポイントとランクが更新されている
 6. リロードしてもチェック状態が残っている
+7. 幅 1280px でミッションが左の列に収まり、右の列が空いている（Task 13・16 でここが埋まる）
 
 - [ ] **Step 9: Commit**
 
@@ -3256,7 +3283,7 @@ export function AccessSection({
   const needsPrompt = !fakeOrigin && state === 'idle'
 
   return (
-    <section className="mt-6 border-t border-stone-200 pt-4">
+    <section className="border-t border-stone-200 pt-4 lg:border-t-0 lg:pt-0">
       <h3 className="mb-2 text-sm font-bold">行き方のコツ</h3>
       <p className="text-sm leading-relaxed text-stone-700">{town.accessTips}</p>
 
@@ -3315,7 +3342,9 @@ export function AccessSection({
 
 - [ ] **Step 4: カード詳細に差し込む**
 
-`src/features/card/CardDetail.tsx` の props に `fakeOrigin: { lat: number; lng: number } | null` を追加し、ミッションのセクションの後に `<AccessSection town={town} fakeOrigin={fakeOrigin} />` を置く。`App.tsx` の `CardDetail` 呼び出しに `fakeOrigin={game.demo.fakeOrigin}` を渡す。
+`src/features/card/CardDetail.tsx` の props に `fakeOrigin: { lat: number; lng: number } | null` を追加し、Task 12 で用意した `grid` の中、ミッションのセクションの**次の要素**として `<AccessSection town={town} fakeOrigin={fakeOrigin} />` を置く（`<section>` を並べると `lg` で右の列に入る）。`App.tsx` の `CardDetail` 呼び出しに `fakeOrigin={game.demo.fakeOrigin}` を渡す。
+
+`AccessSection` の `border-t` を `lg:border-t-0` で消しているのは、縦に積むときは区切り線が要るが、左右に並ぶと不要になるため。
 
 - [ ] **Step 5: 手動確認する**
 
@@ -3327,6 +3356,7 @@ export function AccessSection({
 4. 「Googleマップで経路を開く」を押すと、新しいタブでGoogleマップが開き、目的地がその町になっている
 5. 許可を拒否すると手入力欄が出る。`東京駅` と入れて経路を開くと、出発地が東京駅になっている
 6. 出発地を空のまま経路を開いても、目的地だけのGoogleマップが開く（エラーにならない）
+7. 幅 1280px でミッションが左、行き方が右に並ぶ。375px では縦に積まれ、区切り線が出る
 
 - [ ] **Step 6: Commit**
 
@@ -3540,7 +3570,8 @@ export function CollectionScreen({
         ))}
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
+      {/* 幅に応じて列数を増やす（仕様 9.1） */}
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {sortPulls(pulls, key, townById).map((pull) => {
           const town = townById(pull.townId)
           if (!town) return null
@@ -3608,6 +3639,7 @@ const currentTown = current ? game.townById(current.townId) : undefined
 3. カードを押すとカード詳細が開き、ガチャ直後と同じ見た目になっている
 4. そこでチェックを変えて戻ると、タイルの「ミッション n/3」が更新されている
 5. カードが0枚のときは空の案内が出る
+6. 幅を変えると列数が変わる（375px は2列、768px は3列、1280px は4〜5列）。どの幅でもタイルが潰れない
 
 - [ ] **Step 8: Commit**
 
@@ -4022,7 +4054,7 @@ export function PhotoSection({ pullId }: { pullId: string }) {
   }
 
   return (
-    <section className="mt-6 border-t border-stone-200 pt-4">
+    <section className="border-t border-stone-200 pt-4">
       <div className="mb-2 flex items-center justify-between">
         <h3 className="text-sm font-bold">写真</h3>
         <button onClick={handleAddClick} className="text-sm text-stone-500 underline">
@@ -4081,7 +4113,7 @@ export function PhotoSection({ pullId }: { pullId: string }) {
 
 - [ ] **Step 7: カード詳細の末尾に差し込む**
 
-`CardDetail.tsx` の `AccessSection` の後に `<PhotoSection pullId={pull.id} />` を置く。
+`CardDetail.tsx` の `grid` の中、`AccessSection` の後に `<PhotoSection pullId={pull.id} />` を置く。`lg` では右の列に「行き方」と「写真」が縦に並ぶ形になる。
 
 - [ ] **Step 8: 手動確認する**
 
@@ -4093,6 +4125,7 @@ export function PhotoSection({ pullId }: { pullId: string }) {
 6. 「×」で削除できる
 7. 別のカードを開くと、そのカードの写真だけが出る（混ざらない）
 8. プライベートブラウズで開き、写真以外（ガチャ・コレクション・プロフィール）が動くことを確認する
+9. 幅 1280px で右の列に「行き方」と「写真」が縦に並ぶ。写真のサムネイルが正方形を保っている
 
 - [ ] **Step 9: Commit**
 
@@ -4358,18 +4391,21 @@ function handleDraw(mode: DrawMode) {
 
 次を通しで直す。凝らず、揃えることを優先する：
 
-1. 余白を揃える（画面の左右は `px-4`、セクション間は `mt-6`）
+1. 余白を揃える（画面の左右は `px-4 md:px-8`、セクション間は `mt-6`）
 2. 文字サイズを3段階に絞る（見出し `text-xl`、本文 `text-sm`、補足 `text-xs`）
 3. レア度の色がバッジ・演出・タイルで一致していることを確認する
-4. タップ対象の高さを44px以上にする（`py-3` 以上）
-5. 長い町名でレイアウトが崩れないか、最も長い町名のカードで確認する
+4. タップ対象の高さを44px以上にする（`py-3` 以上）。**これはどの幅でも守る**
+5. 長い町名でレイアウトが崩れないか、最も長い町名のカードで**3つの幅すべてで**確認する
+6. 本文の行長を確認する。広い画面で文章が端から端まで伸びている箇所があれば `max-w-prose` などで制限する（仕様 9.1）
+7. `375px / 768px / 1280px` の3点で全画面を一巡し、**横スクロールが出ないこと**を確認する
 
 - [ ] **Step 5: 手動確認する**
 
 1. 引くと演出が出て、レア度に応じた色で光り、カード詳細に進む
 2. 演出中に画面を押すと、すぐカード詳細に進む
 3. OSの「視差効果を減らす」を有効にすると、回転が止まる（文字は進む）
-4. スマホの実機（または開発者ツールのモバイル表示）で、横スクロールが出ない
+4. `375px / 768px / 1280px` の3点で全画面を一巡し、横スクロールが出ない
+5. 幅を連続的に変えても、タブの下部固定と上部横並びの切り替わりで本文が隠れたり重なったりしない
 
 - [ ] **Step 6: Commit**
 
@@ -4442,6 +4478,7 @@ npx vercel --prod
 5. 写真の「＋追加」でカメラが起動し、撮った写真がカードに残る
 6. リロードしてもカードと写真が残っている
 7. 横スクロールが出ない。タップ対象が押しやすい
+8. 同じURLをPCのブラウザでも開き、タブが上部に出て、コレクションが4〜5列で並ぶことを確認する（仕様 9.1）
 
 - [ ] **Step 5: デモモードで発表の流れを通す**
 
@@ -4486,6 +4523,7 @@ git commit -m "chore: Vercelへデプロイ"
 | 8 コレクションと写真 | Task 14、Task 16 |
 | 8.1 保存の注釈 | Task 15（常設）、Task 16（初回） |
 | 9 画面構成 | Task 1、11、12、14、15 |
+| 9.1 レスポンシブ対応 | Task 1（外枠・タブの切り替え）、Task 12（カード詳細の段組み）、Task 14（列数）、Task 18（通しの確認）、Task 19（実機とPC） |
 | 10 データモデル | Task 2、Task 7 |
 | 10.1 `member_id` | Task 7、Task 11 |
 | 11.1〜11.3 データ源と生成 | Task 8、9、10 |
