@@ -4,6 +4,7 @@ import type { Pull } from './domain/types'
 import { useGame } from './state/useGame'
 import { CardDetail } from './features/card/CardDetail'
 import { CollectionScreen } from './features/collection/CollectionScreen'
+import { DrawAnimation } from './features/gacha/DrawAnimation'
 import { HomeScreen } from './features/gacha/HomeScreen'
 import { DemoModePanel } from './features/profile/DemoModePanel'
 import { ProfileScreen } from './features/profile/ProfileScreen'
@@ -14,14 +15,16 @@ export default function App() {
   const game = useGame()
   const [tab, setTab] = useState<TabId>('gacha')
   const [selectedPull, setSelectedPull] = useState<Pull | null>(null)
+  const [pendingPull, setPendingPull] = useState<Pull | null>(null)
 
   function handleDraw(mode: DrawMode) {
     const pull = game.draw(mode)
-    if (pull) setSelectedPull(pull)
+    if (pull) setPendingPull(pull)
   }
 
   function changeTab(next: TabId) {
     setSelectedPull(null)
+    setPendingPull(null)
     setTab(next)
   }
 
@@ -53,7 +56,17 @@ export default function App() {
           <p className="text-red-600">町データの読み込みに失敗しました。再読み込みしてください。</p>
         )}
 
-        {game.status === 'ready' && (
+        {game.status === 'ready' && pendingPull && game.townById(pendingPull.townId) && (
+          <DrawAnimation
+            rarity={game.townById(pendingPull.townId)!.rarity}
+            onDone={() => {
+              setSelectedPull(pendingPull)
+              setPendingPull(null)
+            }}
+          />
+        )}
+
+        {game.status === 'ready' && !pendingPull && (
           current && currentTown ? (
             <CardDetail
               pull={current}

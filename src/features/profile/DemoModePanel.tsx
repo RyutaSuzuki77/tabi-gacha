@@ -52,7 +52,7 @@ export function DemoModePanel({
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => onChange({ ...demo, fakeOrigin: null })}
-            className={`rounded-full px-3 py-2 text-xs ${
+            className={`rounded-full px-4 py-3 text-xs ${
               demo.fakeOrigin === null ? 'bg-amber-900 text-white' : 'border border-amber-300'
             }`}
           >
@@ -65,7 +65,7 @@ export function DemoModePanel({
               <button
                 key={preset.label}
                 onClick={() => onChange({ ...demo, fakeOrigin: { lat: preset.lat, lng: preset.lng } })}
-                className={`rounded-full px-3 py-2 text-xs ${
+                className={`rounded-full px-4 py-3 text-xs ${
                   active ? 'bg-amber-900 text-white' : 'border border-amber-300'
                 }`}
               >

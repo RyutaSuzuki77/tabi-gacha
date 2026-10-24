@@ -16,7 +16,7 @@ export function MissionList({
     <ul className="space-y-2">
       {pull.missions.map((mission, index) => (
         <li key={index}>
-          <label className="flex items-start gap-3 py-1">
+          <label className="flex items-start gap-3 py-3">
             <input
               type="checkbox"
               checked={mission.done}

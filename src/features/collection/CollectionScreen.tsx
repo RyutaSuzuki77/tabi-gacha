@@ -35,7 +35,7 @@ export function CollectionScreen({
           <button
             key={k}
             onClick={() => setKey(k)}
-            className={`rounded-full px-3 py-2 text-xs ${
+            className={`rounded-full px-4 py-3 text-xs ${
               key === k ? 'bg-stone-900 text-white' : 'border border-stone-300 text-stone-500'
             }`}
           >
