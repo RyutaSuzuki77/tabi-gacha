@@ -1687,11 +1687,27 @@ git commit -m "feat(storage): profile と pulls の永続化層（member_id・�
   - `buildSkeletonTown(row: { code: string; prefecture: string; name: string; population: string }): Town | null`
   - `curate(towns: Town[], perRegionPerRarity: number, rng: Rng): Town[]`
 
-**入力データの前提:** `scripts/raw/towns.csv` に、ヘッダ付きで次の列を持つCSVを置く。列名は正確に一致させる。
-`code,prefecture,name,population`
-e-Statから落としたファイルの列名が異なる場合は、`buildSkeleton.ts` の中で列名を読み替える処理を足す（純ロジックは変更しない）。
+**入力データ:** `scripts/raw/towns.csv` に投入済み。確認した内容は次のとおり。
 
-**座標の列は不要。** 目的地はGoogleマップに地名で渡すため（仕様 6.1）、落とすデータセットは人口の1つだけで足りる。
+| 項目 | 実測 |
+|---|---|
+| 行数 | 2,226行（ヘッダを除く） |
+| 列 | `code,prefecture,name,population` |
+| 文字コード | UTF-8（BOMなし） |
+| 改行 | CRLF（`parseCsv` が `/\r?\n/` で分割するので問題なし） |
+| `code` | **6桁**（末尾が検査数字）。`normalizeRow` で5桁に落とす |
+| 都道府県名 | 47件すべて地方に割り当て可能（表記ゆれなし） |
+| 集計行 | 含まれない |
+| 人口のパース失敗 | 0件 |
+
+フィルタを通した結果の実測値：
+
+- 除外：「区」で終わる **194件**（うち人口10万人未満が **33件** ―― 千代田区 69,139人を含む）／人口10万人以上 **261件**／人口100人未満 **6件**（北方領土の6村、すべて人口0）
+- **出題候補：1,765件**（SSR 199 / SR 411 / R 575 / N 580）
+- 最小人口は東京都青ヶ島村 155人、最大は大阪府泉佐野市 99,623人
+- **8地方 × 4レア度の32セルすべてが10件以上**あるため、`curate(towns, 10, rng)` で **320件**がちょうど取れる
+
+**座標の列はない。** 目的地はGoogleマップに地名で渡すため（仕様 6.1）、落とすデータセットは人口の1つだけで足りる。
 
 - [ ] **Step 1: 失敗するテストを書く**
 
@@ -2000,8 +2016,14 @@ function shuffle<T>(items: T[], rng: Rng): T[] {
  * scripts/raw/towns.csv から骨格の towns.json を作る。
  * 使い方: npx tsx scripts/buildSkeleton.ts [1地方1レア度あたりの件数]
  *
- * 列名は code,prefecture,name,population を前提にしている。
- * 落としてきたCSVの列名が違う場合は、下の normalizeRow を直す。
+ * 投入済みの実データの形（確認済み）：
+ * - 文字コード UTF-8（BOMなし）、改行 CRLF、2,226行
+ * - 列名 code,prefecture,name,population
+ * - code は6桁（末尾が検査数字）なので5桁に落とす
+ * - 都道府県名は47件すべて「北海道」「青森県」…の表記で、地方への割り当てに漏れなし
+ * - 集計行（全国計・都道府県計）は含まれない
+ *
+ * 別のデータに差し替えた場合は、下の normalizeRow を直す。
  */
 import { readFileSync, writeFileSync } from 'node:fs'
 import { buildSkeletonTown, curate, parseCsv } from './skeleton.logic'
@@ -2011,7 +2033,8 @@ const OUTPUT = 'public/data/towns.json'
 
 function normalizeRow(row: Record<string, string>) {
   return {
-    code: row.code,
+    // 6桁コードの末尾は検査数字。5桁に落として自治体コードとして使う
+    code: row.code.length === 6 ? row.code.slice(0, 5) : row.code,
     prefecture: row.prefecture,
     name: row.name,
     population: row.population,
@@ -2495,7 +2518,15 @@ export const AI_DISCLAIMER =
 npx tsx scripts/buildSkeleton.ts 10
 ```
 
-期待：`public/data/towns.json` が作られ、コンソールに「キュレート後: 約300件」と出る。8地方 × 4レア度 × 10件＝最大320件。候補が少ない組み合わせはそれ未満になる。
+期待：`public/data/towns.json` が作られ、コンソールに次が出る（実データで確認済みの数値）。
+
+```
+読み込み: 2226 行
+対象（10万人未満）: 1765 件
+キュレート後: 320 件 → public/data/towns.json
+```
+
+**この3つの数字が合わなければ、変換のどこかで取りこぼしている。** 特に「対象」が 1,765 より大幅に少ない場合は、`code` の桁数処理か都道府県名の読み替えを疑う。
 
 - [ ] **Step 5: 汎用ミッションプールを作る**
 
