@@ -48,15 +48,22 @@ export async function seedSchemaOnly(page: Page) {
   await seedKeys(page, {})
 }
 
-export type Tab = 'ひく' | 'あつめた' | 'じぶん'
+export type Tab = 'gacha' | 'collection' | 'profile'
+
+/** タブの表示名。ラベルが変わったらここだけ直す（src/ui/TabBar.tsx と対応） */
+export const TAB_LABELS: Record<Tab, string> = {
+  gacha: 'ガチャ',
+  collection: 'コレクション',
+  profile: 'プロフィール',
+}
 
 export async function openTab(page: Page, tab: Tab) {
-  await page.getByRole('button', { name: tab, exact: true }).click()
+  await page.getByRole('button', { name: TAB_LABELS[tab], exact: true }).click()
 }
 
 /**
  * 実際の演出を通して1枚引く。引き終わるとカード詳細が開いている。
- * 呼ぶ前にホーム（タブ「ひく」）が見えていること。
+ * 呼ぶ前にホーム（タブ「ガチャ」）が見えていること。
  * 返り値は引いた町の名前（カード詳細の見出し。郡は含まない）。
  */
 export async function drawOne(page: Page): Promise<string> {

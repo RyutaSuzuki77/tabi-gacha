@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 
 /** コレクションから、先頭のカードの詳細を開く */
 async function openFirstCard(page: Page) {
-  await openTab(page, 'あつめた')
+  await openTab(page, 'collection')
   await page.locator('main div.grid button').first().click()
   await page.getByRole('button', { name: '← もどる' }).waitFor()
 }
@@ -20,7 +20,7 @@ test('引いたカードがリロード後も残る', async ({ page }) => {
 
   await page.reload()
   await page.getByRole('button', { name: 'ガチャを引く' }).waitFor()
-  await openTab(page, 'あつめた')
+  await openTab(page, 'collection')
   const tiles = page.locator('main div.grid button')
   await expect(tiles).toHaveCount(1)
   await expect(tiles.first()).toContainText(town)

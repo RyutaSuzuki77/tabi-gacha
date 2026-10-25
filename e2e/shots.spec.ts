@@ -44,7 +44,7 @@ for (const width of WIDTHS) {
       await seedDemo(page, { unlimited: true })
       await gotoHome(page)
       await drawMany(page, 9)
-      await openTab(page, 'あつめた')
+      await openTab(page, 'collection')
       await shot(page, width, 'collection')
     })
 
@@ -52,7 +52,7 @@ for (const width of WIDTHS) {
       await seedDemo(page, { unlimited: true })
       await gotoHome(page)
       await drawMany(page, 1)
-      await openTab(page, 'じぶん')
+      await openTab(page, 'profile')
       await shot(page, width, 'profile')
     })
   })

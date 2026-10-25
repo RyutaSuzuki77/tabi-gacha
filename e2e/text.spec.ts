@@ -38,7 +38,7 @@ test.describe('禁止表現（仕様6.4）', () => {
 
   test('プロフィール', async ({ page }) => {
     await gotoHome(page)
-    await openTab(page, 'じぶん')
+    await openTab(page, 'profile')
     await expect(page.getByText('現在地がどこかに保存されることはありません', { exact: false })).toBeVisible()
     await expectNoForbidden(page)
   })
@@ -47,7 +47,7 @@ test.describe('禁止表現（仕様6.4）', () => {
 test.describe('出典（仕様11.5）', () => {
   test('プロフィールに e-Stat の出典とAI生成の明示がある', async ({ page }) => {
     await gotoHome(page)
-    await openTab(page, 'じぶん')
+    await openTab(page, 'profile')
 
     for (const source of DATA_SOURCES) {
       await expect(page.getByRole('link', { name: source.label })).toBeVisible()

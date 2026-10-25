@@ -96,7 +96,7 @@ const SCREENS: Screen[] = [
     setup: async (page) => {
       await gotoHome(page)
       await drawMany(page, 3)
-      await openTab(page, 'あつめた')
+      await openTab(page, 'collection')
       await expect(page.locator('main div.grid button')).toHaveCount(3)
     },
   },
@@ -104,7 +104,7 @@ const SCREENS: Screen[] = [
     name: 'プロフィール',
     setup: async (page) => {
       await gotoHome(page)
-      await openTab(page, 'じぶん')
+      await openTab(page, 'profile')
       await expect(page.getByText('デモモード', { exact: true })).toBeVisible()
     },
   },
@@ -198,7 +198,7 @@ test.describe('コレクションの列数', () => {
     await seedPhotoNoticeSeen(page)
     await gotoHome(page)
     await drawMany(page, 9) // 5列を数えるには5枚以上要る
-    await openTab(page, 'あつめた')
+    await openTab(page, 'collection')
     const tiles = page.locator('main div.grid button')
     await expect(tiles).toHaveCount(9)
 
