@@ -8,8 +8,8 @@ export function eligibleMissions(pool: GenericMission[], townTags: string[]): Ge
 
 /**
  * 汎用ミッションを重複なく引く。
- * 成立する候補が足りない場合は、条件なしのミッション（requiredTags が空）で補う。
- * それでも足りなければ、あるだけ返す（同じミッションを2枚並べない）。
+ * 条件なしのミッション（requiredTags が空）は eligibleMissions が常に含むので、
+ * 候補が足りない場合はそのまま、あるだけ返す（同じミッションを2枚並べない）。
  */
 export function drawGenericMissions(
   pool: GenericMission[],
@@ -18,10 +18,6 @@ export function drawGenericMissions(
   count = 2,
 ): GenericMission[] {
   const candidates = [...eligibleMissions(pool, townTags)]
-  const unconditional = pool.filter((m) => m.requiredTags.length === 0)
-  for (const m of unconditional) {
-    if (!candidates.some((c) => c.id === m.id)) candidates.push(m)
-  }
 
   const picked: GenericMission[] = []
   while (picked.length < count && candidates.length > 0) {
