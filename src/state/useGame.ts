@@ -49,7 +49,23 @@ export function useGame() {
 
   const total = useMemo(() => totalPoints(pulls, townById), [pulls, townById])
   const rank = useMemo(() => rankFor(total), [total])
-  const canDrawNow = canDraw(profile.lastDrawnAt, new Date(), demo.unlimited)
+  // 日付をまたいでも押せるようにするため、現在時刻は state で持って更新する
+  const [now, setNow] = useState(() => new Date())
+  useEffect(() => {
+    const refresh = () => setNow(new Date())
+    const timer = setInterval(refresh, 60_000)
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') refresh()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    window.addEventListener('focus', refresh)
+    return () => {
+      clearInterval(timer)
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('focus', refresh)
+    }
+  }, [])
+  const canDrawNow = canDraw(profile.lastDrawnAt, now, demo.unlimited)
 
   const draw = useCallback(
     (mode: DrawMode): Pull | null => {
@@ -67,6 +83,7 @@ export function useGame() {
       if (!pull) return null
       setPulls(addPull(pull))
       setProfile(recordDraw(new Date()))
+      setNow(new Date())
       return pull
     },
     [canDrawNow, towns, generics, profile.memberId, demo.forcedRarity],

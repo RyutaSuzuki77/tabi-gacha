@@ -28,6 +28,7 @@ export function HomeScreen({
   const [region, setRegion] = useState<Region | 'all'>('all')
   const [phase, setPhase] = useState<MachinePhase>('idle')
   const [pull, setPull] = useState<Pull | null>(null)
+  const [noTown, setNoTown] = useState(false)
 
   // コールバックは ref で持つ。依存に入れると演出中の再描画でタイマーが振り出しに戻る
   const onRevealedRef = useRef(onRevealed)
@@ -55,7 +56,12 @@ export function HomeScreen({
   function handleTurn() {
     const mode: DrawMode = region === 'all' ? { kind: 'nationwide' } : { kind: 'region', region }
     const drawn = onDraw(mode)
-    if (!drawn) return
+    if (!drawn) {
+      // 押せる状態で抽選が空振りしたのは、条件に合う町がなかったとき
+      if (canDraw) setNoTown(true)
+      return
+    }
+    setNoTown(false)
     setPull(drawn)
     setPhase('turning')
   }
@@ -67,7 +73,10 @@ export function HomeScreen({
     <div className="mx-auto flex w-full max-w-md flex-1 flex-col">
       <div className="mb-5 flex items-center gap-2">
         <button
-          onClick={() => setRegion('all')}
+          onClick={() => {
+            setRegion('all')
+            setNoTown(false)
+          }}
           disabled={busy}
           className={`rounded-full px-5 py-3 text-sm font-bold transition-colors disabled:opacity-50 ${
             region === 'all' ? 'bg-kinari text-sumi' : 'bg-ai-mid text-kinari/70'
@@ -78,7 +87,10 @@ export function HomeScreen({
         <div className="relative flex-1">
           <select
             value={region === 'all' ? '' : region}
-            onChange={(e) => setRegion((e.target.value || 'all') as Region | 'all')}
+            onChange={(e) => {
+              setRegion((e.target.value || 'all') as Region | 'all')
+              setNoTown(false)
+            }}
             disabled={busy}
             className={`w-full appearance-none rounded-full py-3 pl-5 pr-10 text-sm font-bold
                         disabled:opacity-50 ${
@@ -109,6 +121,11 @@ export function HomeScreen({
         <p className="mt-1 text-xs text-kinari/60">
           {rankTitle}　{total}pt
         </p>
+        {noTown && (
+          <p role="status" className="mt-3 text-xs leading-relaxed text-ssr">
+            この条件では引ける町がありませんでした。モードを変えて試してください。
+          </p>
+        )}
         {demoActive && (
           <p className="mt-2 inline-block rounded-full bg-ssr px-3 py-1 text-xs font-bold text-sumi">
             デモモードが有効
