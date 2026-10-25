@@ -10,8 +10,11 @@ type Violation = { what: string; width: number; height: number }
 
 /** 画面内の操作要素を測り、44px 未満のものを返す */
 async function tapTargetViolations(page: Page): Promise<Violation[]> {
+  // 仕様9.1のタップ対象は操作のための要素（ボタン・タブ・チェックのラベル等）を指す。
+  // 本文の段落（p / li）の中に埋まった行内リンクは行の高さで決まるため対象外。
+  // 除外するのは「p か li の中の a」だけで、button やタブは除外しない。
   const handles = await page
-    .locator('button, a[href], input, select, textarea, [role="button"]')
+    .locator('button, a[href]:not(p a, li a), input, select, textarea, [role="button"]')
     .elementHandles()
   const found: Violation[] = []
 
@@ -184,21 +187,17 @@ test.describe('ナビゲーションの位置', () => {
 
 test.describe('コレクションの列数', () => {
   /**
-   * 期待値の根拠は CollectionScreen.tsx のグリッドのクラス:
-   *   grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8
-   * Tailwind v4 の既定ブレークポイント sm=640 / lg=1024 / xl=1280。
-   *   375px -> 3列 / 768px -> 4列（sm） / 1280px -> 8列（xl）
-   * 仕様9.1の「1280pxで4〜5列」や docs/manual-check.md の「375pxで2列」とは一致しない。
-   * ここでは実装のクラスを正として測り、食い違いは報告書に書く。
+   * 期待値の根拠は実装ではなく仕様9.1の表（狭い2列 / 中間3列 / 広い4〜5列）。
+   *   375px -> 2列 / 768px -> 3列 / 1280px -> 4〜5列（範囲で判定）
    */
-  const EXPECTED: Record<number, number> = { 375: 3, 768: 4, 1280: 8 }
+  const EXPECTED: Record<number, [number, number]> = { 375: [2, 2], 768: [3, 3], 1280: [4, 5] }
 
   test('幅ごとの1行の枚数', async ({ page }) => {
     test.setTimeout(120_000)
     await seedDemo(page, { unlimited: true, forcedRarity: null })
     await seedPhotoNoticeSeen(page)
     await gotoHome(page)
-    await drawMany(page, 9) // 8列を数えるには8枚以上要る
+    await drawMany(page, 9) // 5列を数えるには5枚以上要る
     await openTab(page, 'あつめた')
     const tiles = page.locator('main div.grid button')
     await expect(tiles).toHaveCount(9)
@@ -207,7 +206,10 @@ test.describe('コレクションの列数', () => {
       await page.setViewportSize({ width, height: 800 })
       const ys = await tiles.evaluateAll((els) => els.map((el) => Math.round(el.getBoundingClientRect().y)))
       const perRow = ys.filter((y) => Math.abs(y - ys[0]) <= 2).length
-      expect(perRow, `${width}px の1行の枚数（y座標: ${ys.join(',')}）`).toBe(EXPECTED[width])
+      const [min, max] = EXPECTED[width]
+      const msg = `${width}px の1行の枚数（y座標: ${ys.join(',')}）`
+      expect(perRow, msg).toBeGreaterThanOrEqual(min)
+      expect(perRow, msg).toBeLessThanOrEqual(max)
     }
   })
 })
