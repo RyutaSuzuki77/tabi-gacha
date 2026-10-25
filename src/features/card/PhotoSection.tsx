@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { Photo } from '../../domain/types'
 import { addPhoto, deletePhoto, listPhotos, type PhotoErrorReason } from '../../storage/photoStore'
 import { KEYS, readJson, writeJson } from '../../storage/schema'
+import { PhotoViewer } from './PhotoViewer'
 
 const MESSAGES: Record<PhotoErrorReason, string> = {
   unavailable: 'このブラウザでは写真を保存できません。',
@@ -17,6 +18,8 @@ export function PhotoSection({ pullId }: { pullId: string }) {
   const [showNotice, setShowNotice] = useState(false)
   // 写真はこの端末にしかない。誤タップで消えないよう、削除は2段にする
   const [confirmingId, setConfirmingId] = useState<string | null>(null)
+  // 拡大中の写真は位置ではなく id で持つ。削除で配列がずれても別の写真を指さない
+  const [viewingId, setViewingId] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -28,6 +31,8 @@ export function PhotoSection({ pullId }: { pullId: string }) {
     setItems(next)
     return () => next.forEach(({ url }) => URL.revokeObjectURL(url))
   }, [photos])
+
+  const viewingIndex = items.findIndex(({ photo }) => photo.id === viewingId)
 
   function handleAddClick() {
     const seen = readJson<boolean>(KEYS.photoNotice, false)
@@ -57,6 +62,7 @@ export function PhotoSection({ pullId }: { pullId: string }) {
 
   async function handleDelete(id: string) {
     setConfirmingId(null)
+    setViewingId(null)
     await deletePhoto(id)
     setPhotos(await listPhotos(pullId))
   }
@@ -99,13 +105,19 @@ export function PhotoSection({ pullId }: { pullId: string }) {
         <div className="grid grid-cols-3 gap-2">
           {items.map(({ photo, url }) => (
             <div key={photo.id} className="relative">
-              <img
-                src={url}
-                alt=""
-                className={`aspect-square w-full rounded-xl object-cover ${
-                  confirmingId === photo.id ? 'ring-4 ring-beni' : ''
-                }`}
-              />
+              <button
+                onClick={() => setViewingId(photo.id)}
+                aria-label="写真を拡大する"
+                className="block w-full"
+              >
+                <img
+                  src={url}
+                  alt=""
+                  className={`aspect-square w-full rounded-xl object-cover ${
+                    confirmingId === photo.id ? 'ring-4 ring-beni' : ''
+                  }`}
+                />
+              </button>
               <button
                 onClick={() => setConfirmingId(photo.id)}
                 aria-label="この写真を削除する"
@@ -138,6 +150,15 @@ export function PhotoSection({ pullId }: { pullId: string }) {
             </button>
           </div>
         </div>
+      )}
+
+      {viewingIndex >= 0 && (
+        <PhotoViewer
+          items={items}
+          index={viewingIndex}
+          onIndexChange={(i) => setViewingId(items[i]?.photo.id ?? null)}
+          onClose={() => setViewingId(null)}
+        />
       )}
     </section>
   )
