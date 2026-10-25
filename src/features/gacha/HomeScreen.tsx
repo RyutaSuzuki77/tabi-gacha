@@ -121,7 +121,7 @@ export function HomeScreen({
         <p className="mt-1 text-xs text-kinari/60">
           {rankTitle}　{total}pt
         </p>
-        {noTown && (
+        {noTown && canDraw && (
           <p role="status" className="mt-3 text-xs leading-relaxed text-ssr">
             この条件では引ける町がありませんでした。モードを変えて試してください。
           </p>

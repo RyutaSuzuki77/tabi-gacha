@@ -54,9 +54,6 @@
 
 ## 加工した内容
 
-- ExcelをCSV UTF-8 に変換し、`code,prefecture,name,population` の4列に整形
-- 自治体コードは文字列として扱い、先頭のゼロを保持。6桁の場合は5桁に揃えた
-
 ### CSVに対して行った加工
 
 - ExcelをCSV UTF-8 に変換し、`code,prefecture,name,population` の4列に整形
