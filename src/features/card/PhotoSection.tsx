@@ -108,6 +108,7 @@ export function PhotoSection({ pullId }: { pullId: string }) {
               <button
                 onClick={() => setViewingId(photo.id)}
                 aria-label="写真を拡大する"
+                data-photo-thumb={photo.id}
                 className="block w-full"
               >
                 <img

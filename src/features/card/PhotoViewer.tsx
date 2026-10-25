@@ -36,6 +36,10 @@ export function PhotoViewer({ items, index, onIndexChange, onClose }: Props) {
   }
 
   // 開いている間だけ: 背面のスクロールを止め、キーを受け、フォーカスを預かる
+  // 戻し先は「開いた写真」のサムネイル。Safari はクリックでフォーカスを付けないことがあり、
+  // document.activeElement は当てにならない。開いた時点の id を覚えておく
+  const openedId = useRef(items[index]?.photo.id)
+
   useEffect(() => {
     const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null
     const previousOverflow = document.body.style.overflow
@@ -52,7 +56,14 @@ export function PhotoViewer({ items, index, onIndexChange, onClose }: Props) {
     return () => {
       window.removeEventListener('keydown', onKeyDown)
       document.body.style.overflow = previousOverflow
-      if (opener?.isConnected) opener.focus()
+      const id = openedId.current
+      const thumb =
+        id === undefined
+          ? null
+          : document.querySelector<HTMLElement>(`[data-photo-thumb="${CSS.escape(id)}"]`)
+      // 開いた写真が消えていたら、フォーカスしていた要素（あれば）へ
+      const target = thumb ?? opener
+      if (target?.isConnected) target.focus()
     }
   }, [])
 
@@ -67,8 +78,8 @@ export function PhotoViewer({ items, index, onIndexChange, onClose }: Props) {
       aria-label="写真の拡大表示"
       tabIndex={-1}
       onClick={(e) => {
-        // 写真やボタンの外（背景）をタップしたときだけ閉じる
-        if (e.target === e.currentTarget) onClose()
+        // 写真とボタン以外（背景・上下の行の空白）をタップしたら閉じる
+        if (e.target instanceof Element && !e.target.closest('img, button')) onClose()
       }}
       onTouchStart={(e) => {
         const t = e.touches[0]
@@ -93,12 +104,7 @@ export function PhotoViewer({ items, index, onIndexChange, onClose }: Props) {
         </button>
       </div>
 
-      <div
-        className="flex min-h-0 w-full flex-1 items-center justify-center"
-        onClick={(e) => {
-          if (e.target === e.currentTarget) onClose()
-        }}
-      >
+      <div className="flex min-h-0 w-full flex-1 items-center justify-center">
         <img
           src={current.url}
           alt=""
@@ -107,15 +113,19 @@ export function PhotoViewer({ items, index, onIndexChange, onClose }: Props) {
       </div>
 
       <div className="flex items-center gap-4">
-        <button onClick={() => go(-1)} disabled={atFirst} aria-label="前の写真" className={NAV_BUTTON}>
-          ←
-        </button>
+        {total > 1 && (
+          <button onClick={() => go(-1)} disabled={atFirst} aria-label="前の写真" className={NAV_BUTTON}>
+            ←
+          </button>
+        )}
         <p className="min-w-16 text-center font-display text-lg text-kinari" aria-live="polite">
           {index + 1} / {total}
         </p>
-        <button onClick={() => go(1)} disabled={atLast} aria-label="次の写真" className={NAV_BUTTON}>
-          →
-        </button>
+        {total > 1 && (
+          <button onClick={() => go(1)} disabled={atLast} aria-label="次の写真" className={NAV_BUTTON}>
+            →
+          </button>
+        )}
       </div>
     </div>,
     document.body,
