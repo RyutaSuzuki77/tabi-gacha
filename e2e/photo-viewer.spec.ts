@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { pngFile } from './png'
+import { makeRectPng, pngFile } from './png'
 import { drawOne, gotoHome, seedDemo, seedPhotoNoticeSeen } from './seed'
 
 const MIN_TAP = 44
@@ -134,6 +134,26 @@ test('Esc で閉じ、背景のタップでも閉じる。閉じたらスクロ�
   await dialog(page).click({ position: { x: 5, y: 5 } })
   await expect(dialog(page)).toHaveCount(0)
 
+  // 上段の行（×の左の空白）と下段の行（送りボタンの左右の空白・枚数の文字）でも閉じる
+  await thumb.click()
+  const closeBtn = dialog(page).getByRole('button', { name: '閉じる' })
+  const closeBox = (await closeBtn.boundingBox())!
+  await page.mouse.click(closeBox.x - 40, closeBox.y + closeBox.height / 2)
+  await expect(dialog(page), '上段の行の空白').toHaveCount(0)
+
+  await thumb.click()
+  const prevBox = (await dialog(page).getByRole('button', { name: '前の写真' }).boundingBox())!
+  await page.mouse.click(prevBox.x - 20, prevBox.y + prevBox.height / 2)
+  await expect(dialog(page), '下段の行の空白').toHaveCount(0)
+
+  // 送りボタンを押しても閉じない
+  await thumb.click()
+  await dialog(page).getByRole('button', { name: '前の写真' }).click()
+  await expect(dialog(page)).toBeVisible()
+  await expect(counter(page)).toHaveText('1 / 2')
+  await dialog(page).getByText('1 / 2').click()
+  await expect(dialog(page), '枚数の文字のタップでも閉じる').toHaveCount(0)
+
   // 写真そのもののタップでは閉じない
   await thumb.click()
   await dialog(page).locator('img').click()
@@ -163,3 +183,63 @@ test('削除ボタンを押してもモーダルは開かない（確認が出�
   await expect(page.getByRole('button', { name: '消す' })).toBeVisible()
   await expect(dialog(page)).toHaveCount(0)
 })
+
+test('複数枚のどのサムネイルの削除ボタンでもモーダルは開かない', async ({ page }) => {
+  await addPhotos(page, 3)
+  const dels = page.getByRole('button', { name: 'この写真を削除する' })
+  await expect(dels).toHaveCount(3)
+  for (const i of [2, 1, 0]) {
+    await dels.nth(i).click()
+    await expect(page.getByRole('button', { name: '消す' }), `${i}枚目`).toBeVisible()
+    await expect(dialog(page), `${i}枚目の×でモーダルが開いた`).toHaveCount(0)
+    await page.getByRole('button', { name: 'やめる' }).click()
+  }
+})
+
+test('1枚だけのときは前後ボタンが出ない（閉じるは出る）', async ({ page }) => {
+  await addPhotos(page, 1)
+  await page.getByRole('button', { name: '写真を拡大する' }).click()
+  await expect(dialog(page).getByRole('button', { name: '閉じる' })).toBeVisible()
+  await expect(dialog(page).getByRole('button', { name: '前の写真' })).toHaveCount(0)
+  await expect(dialog(page).getByRole('button', { name: '次の写真' })).toHaveCount(0)
+})
+
+test('フォーカスの戻し先は document.activeElement に頼らない（Safari 相当）', async ({ page }) => {
+  await addPhotos(page, 2)
+  const thumb = page.getByRole('button', { name: '写真を拡大する' }).nth(1)
+  // Safari のようにクリックでフォーカスが付かない状況: 開く直前にフォーカスを body へ逃がす
+  await thumb.evaluate((el) => {
+    el.addEventListener('click', () => (document.activeElement as HTMLElement | null)?.blur(), {
+      capture: true,
+    })
+  })
+  await thumb.click()
+  await expect(dialog(page)).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(dialog(page)).toHaveCount(0)
+  await expect(thumb, '開いた写真のサムネイルへ戻る').toBeFocused()
+})
+
+for (const width of [375, 768, 1280]) {
+  test(`縦長の写真が画面の高さに収まる（${width}px）`, async ({ page }) => {
+    const height = 700
+    await page.setViewportSize({ width, height })
+    await page.locator('input[type=file]').setInputFiles({
+      name: 'tall.png',
+      mimeType: 'image/png',
+      buffer: makeRectPng(400, 1200, [30, 120, 60]),
+    })
+    await page.getByRole('button', { name: '写真を拡大する' }).click()
+    const big = dialog(page).locator('img')
+    await expect.poll(() => big.evaluate((el: HTMLImageElement) => el.naturalHeight)).toBe(1200)
+    const box = (await big.boundingBox())!
+    expect(box.y, '上にはみ出さない').toBeGreaterThanOrEqual(0)
+    expect(box.y + box.height, '下にはみ出さない').toBeLessThanOrEqual(height)
+    expect(box.x + box.width).toBeLessThanOrEqual(width)
+    // 縦長のままの比率で、操作ボタンと重ならない
+    expect(box.height).toBeGreaterThan(box.width)
+    const nextBottom = (await dialog(page).getByRole('button', { name: '閉じる' }).boundingBox())!
+    expect(box.y, '×と重ならない').toBeGreaterThanOrEqual(nextBottom.y + nextBottom.height - 1)
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width)
+  })
+}

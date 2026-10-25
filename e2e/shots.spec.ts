@@ -1,4 +1,4 @@
-import { test, type Page } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 import { drawMany, drawOne, gotoHome, openTab, seedDemo, seedPhotoNoticeSeen } from './seed'
 
 /**
@@ -28,14 +28,15 @@ for (const width of WIDTHS) {
     })
 
     test('ホーム（引いたあと）と カード詳細', async ({ page }) => {
-      // 制限ありのまま1回引く。引いたあとのホームは「きょうのぶんは ひいた」
+      // 制限ありのまま1回引く。引いたあとのホームは引くボタンが無効になる
       await seedDemo(page, { unlimited: false, forcedRarity: 'SSR' })
       await seedPhotoNoticeSeen(page)
       await gotoHome(page)
       await drawOne(page)
       await shot(page, width, 'card-detail')
       await page.getByRole('button', { name: '← もどる' }).click()
-      await page.getByText('きょうのぶんは ひいた').waitFor()
+      // 文言ではなく状態で待つ: 今日のぶんを引いたので、ガチャを引くボタンが押せなくなる
+      await expect(page.getByRole('button', { name: 'ガチャを引く' })).toBeDisabled()
       await shot(page, width, 'home-after')
     })
 
