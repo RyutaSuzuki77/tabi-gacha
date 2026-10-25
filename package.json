@@ -10,13 +10,16 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "data:skeleton": "tsx scripts/buildSkeleton.ts",
-    "data:validate": "vitest run scripts/data.test.ts"
+    "data:validate": "vitest run scripts/data.test.ts",
+    "e2e": "playwright test",
+    "e2e:shots": "playwright test e2e/shots.spec.ts"
   },
   "dependencies": {
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",

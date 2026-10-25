@@ -8,3 +8,8 @@ dist-ssr
 
 # superpowers のワークスペース（台帳・ブリーフ・レビュー資材）
 .superpowers
+
+# Playwright（e2e）の出力
+e2e/shots/
+test-results/
+playwright-report/
