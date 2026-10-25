@@ -121,7 +121,7 @@ export function HomeScreen({
 
       <div className="mt-6 text-center">
         <p className="font-display text-base">
-          {canDraw ? '今日はまだ ひける' : 'きょうのぶんは ひいた'}
+          {canDraw ? '' : '今日は引けません'}
         </p>
         <p className="mt-1 text-xs text-kinari/60">
           {rankTitle}　{total}pt

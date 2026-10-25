@@ -40,9 +40,9 @@ export function CardTile({
           </span>
         )}
       </span>
-      <span className="w-full truncate font-display text-xs">{name}</span>
+      <span className="w-full truncate text-xs">{name}</span>
       <span className="text-[10px] text-kinari/50">
-        {town.prefecture.replace(/[都府県]$/, '')}　{done}/{all}
+        {town.prefecture.replace(/[都府県]$/, '')}　ミッション：{done}/{all}
       </span>
     </button>
   )

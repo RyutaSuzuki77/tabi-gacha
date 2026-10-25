@@ -31,13 +31,13 @@ export default function App() {
   return (
     <Layout>
       <header className="px-4 pt-7 md:px-8">
-        <h1 className="font-display text-3xl leading-none">
+        <h1 className="font-display text-3xl leading-none my-5">
           旅<span className="text-beni">ガチャ</span>
         </h1>
         <TabBar active={tab} onChange={changeTab} />
       </header>
 
-      <main className="flex flex-1 flex-col px-4 pb-24 md:px-8 md:pb-8">
+      <main className="flex flex-1 flex-col px-4 pb-24 md:px-8 md:pb-8 my-5">
         {!game.storageWritable && (
           <p className="mb-4 rounded-xl bg-ssr/15 px-4 py-3 text-xs leading-relaxed text-ssr">
             この画面では引いたカードを保存できません（プライベートブラウズか、端末の空き容量が

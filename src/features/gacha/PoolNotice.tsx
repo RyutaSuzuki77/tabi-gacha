@@ -29,7 +29,7 @@ export function PoolNotice() {
           </p>
           <p>
             そして、人口が少ない町ほどレアに出ます。このガチャでは
-            <strong className="font-display text-kinari">無名であることが価値</strong>です。
+            <strong className="text-kinari">マイナーであることが価値</strong>です。
           </p>
           <ul className="space-y-1.5 pt-1">
             {(['SSR', 'SR', 'R', 'N'] as Rarity[]).map((r) => (

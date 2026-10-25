@@ -1,9 +1,9 @@
 export type TabId = 'gacha' | 'collection' | 'profile'
 
 const TABS: { id: TabId; label: string }[] = [
-  { id: 'gacha', label: 'ひく' },
-  { id: 'collection', label: 'あつめた' },
-  { id: 'profile', label: 'じぶん' },
+  { id: 'gacha', label: 'ガチャ' },
+  { id: 'collection', label: 'コレクション' },
+  { id: 'profile', label: 'プロフィール' },
 ]
 
 /**
