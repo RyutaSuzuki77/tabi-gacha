@@ -8,7 +8,9 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "data:skeleton": "tsx scripts/buildSkeleton.ts",
+    "data:validate": "vitest run scripts/data.test.ts"
   },
   "dependencies": {
     "react": "^19.3.1",
