@@ -21,7 +21,7 @@ export function DemoModePanel({
         発表用の設定です。有効にすると本来の遊び方とは違う動きになります。
       </p>
 
-      <label className="mt-4 flex items-center gap-2 py-2 text-sm">
+      <label className="mt-4 flex min-h-11 items-center gap-2 py-2 text-sm">
         <input
           type="checkbox"
           checked={demo.unlimited}
@@ -52,7 +52,7 @@ export function DemoModePanel({
         <div className="flex flex-wrap gap-2">
           <button
             onClick={() => onChange({ ...demo, fakeOrigin: null })}
-            className={`rounded-full px-4 py-3 text-xs ${
+            className={`min-h-11 rounded-full px-4 py-3 text-xs ${
               demo.fakeOrigin === null ? 'bg-ssr text-sumi' : 'border-2 border-ssr/40 text-kinari/80'
             }`}
           >
@@ -65,7 +65,7 @@ export function DemoModePanel({
               <button
                 key={preset.label}
                 onClick={() => onChange({ ...demo, fakeOrigin: { lat: preset.lat, lng: preset.lng } })}
-                className={`rounded-full px-4 py-3 text-xs ${
+                className={`min-h-11 rounded-full px-4 py-3 text-xs ${
                   active ? 'bg-ssr text-sumi' : 'border-2 border-ssr/40 text-kinari/80'
                 }`}
               >

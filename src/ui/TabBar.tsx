@@ -23,7 +23,7 @@ export function TabBar({ active, onChange }: { active: TabId; onChange: (t: TabI
           <button
             key={t.id}
             onClick={() => onChange(t.id)}
-            className={`flex-1 py-4 text-sm font-bold transition-colors md:flex-none md:rounded-full md:px-6 md:py-2.5 ${
+            className={`min-h-11 flex-1 py-4 text-sm font-bold transition-colors md:flex-none md:rounded-full md:px-6 md:py-2.5 ${
               on
                 ? 'text-kinari md:bg-beni md:text-white'
                 : 'text-kinari/40 md:bg-ai-mid md:text-kinari/60'

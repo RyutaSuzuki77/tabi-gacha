@@ -36,7 +36,7 @@ export function CollectionScreen({
           <button
             key={k}
             onClick={() => setKey(k)}
-            className={`rounded-full px-4 py-3 text-xs font-bold transition-colors ${
+            className={`min-h-11 rounded-full px-4 py-3 text-xs font-bold transition-colors ${
               key === k ? 'bg-kinari text-sumi' : 'bg-ai-mid text-kinari/60'
             }`}
           >
@@ -47,7 +47,7 @@ export function CollectionScreen({
       </div>
 
       {/* 幅に応じて列数を増やす（仕様 9.1） */}
-      <div className="grid grid-cols-3 gap-x-2 gap-y-4 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
+      <div className="grid grid-cols-2 gap-x-2 gap-y-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
         {sortPulls(pulls, key, townById).map((pull) => {
           const town = townById(pull.townId)
           if (!town) return null
