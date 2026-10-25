@@ -61,9 +61,15 @@
 - **行の除外はしていない。** 区・郡の集計行・人口10万人以上・人口の少ない行は、
   いずれもCSVに残っている
 
-### 骨格生成時（`npm run data:skeleton`）に実行時フィルタで除外しているもの
+### 骨格生成時（`npm run data:skeleton`）に行う処理
 
-除外は `scripts/skeleton.logic.ts` の `buildSkeletonTown` が行う。CSVは書き換えない。
+CSVは書き換えず、読み込み時に次の正規化と除外を行う。
+
+**正規化**（`scripts/buildSkeleton.ts` の `normalizeRow`）
+
+- 自治体コードが6桁の場合は5桁に落とす（6桁目は検査数字。先頭5桁を `id` として使う）
+
+**除外**（`scripts/skeleton.logic.ts` の `buildSkeletonTown`）
 
 - 名称が「市」「町」「村」で終わらない行（`isExcludedName`）。次を含む
   - 「区」で終わる行＝特別区・政令市の行政区（仕様 4.1）

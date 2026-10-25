@@ -30,6 +30,11 @@ export function HomeScreen({
   const [pull, setPull] = useState<Pull | null>(null)
   const [noTown, setNoTown] = useState(false)
 
+  // 引けない状態になったら落とす。残すと、翌日に引ける状態へ戻ったとき古い文面が出る
+  useEffect(() => {
+    if (!canDraw) setNoTown(false)
+  }, [canDraw])
+
   // コールバックは ref で持つ。依存に入れると演出中の再描画でタイマーが振り出しに戻る
   const onRevealedRef = useRef(onRevealed)
   onRevealedRef.current = onRevealed
