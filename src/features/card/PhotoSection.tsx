@@ -11,7 +11,8 @@ const MESSAGES: Record<PhotoErrorReason, string> = {
 
 export function PhotoSection({ pullId }: { pullId: string }) {
   const [photos, setPhotos] = useState<Photo[]>([])
-  const [urls, setUrls] = useState<string[]>([])
+  // 写真とそのURLは1つの配列で持つ。別々に持つと、削除直後に隣の写真のURLを引いてしまう
+  const [items, setItems] = useState<{ photo: Photo; url: string }[]>([])
   const [error, setError] = useState<string | null>(null)
   const [showNotice, setShowNotice] = useState(false)
   // 写真はこの端末にしかない。誤タップで消えないよう、削除は2段にする
@@ -23,9 +24,9 @@ export function PhotoSection({ pullId }: { pullId: string }) {
   }, [pullId])
 
   useEffect(() => {
-    const next = photos.map((p) => URL.createObjectURL(p.blob))
-    setUrls(next)
-    return () => next.forEach((url) => URL.revokeObjectURL(url))
+    const next = photos.map((photo) => ({ photo, url: URL.createObjectURL(photo.blob) }))
+    setItems(next)
+    return () => next.forEach(({ url }) => URL.revokeObjectURL(url))
   }, [photos])
 
   function handleAddClick() {
@@ -92,14 +93,14 @@ export function PhotoSection({ pullId }: { pullId: string }) {
 
       {error && <p className="mb-2 rounded-lg bg-ssr/20 px-3 py-2 text-xs text-ssr">{error}</p>}
 
-      {photos.length === 0 ? (
+      {items.length === 0 ? (
         <p className="text-xs text-kinari/50">まだ写真がありません。</p>
       ) : (
         <div className="grid grid-cols-3 gap-2">
-          {photos.map((photo, index) => (
+          {items.map(({ photo, url }) => (
             <div key={photo.id} className="relative">
               <img
-                src={urls[index]}
+                src={url}
                 alt=""
                 className={`aspect-square w-full rounded-xl object-cover ${
                   confirmingId === photo.id ? 'ring-4 ring-beni' : ''

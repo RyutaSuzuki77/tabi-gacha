@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto'
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { addPhoto, classifyPhotoError, deleteAllPhotos, deletePhoto, listPhotos } from './photoStore'
 
 function blob(text: string): Blob {
@@ -90,3 +90,35 @@ describe('保存に失敗したとき', () => {
     }
   })
 }) 
+
+describe('接続の後始末', () => {
+  it('連続して2回保存しても2件読み戻せる', async () => {
+    await addPhoto('p1', blob('a'), new Date('2026-10-24T06:00:00.000Z'))
+    await addPhoto('p1', blob('b'), new Date('2026-10-24T06:00:01.000Z'))
+    expect(await listPhotos('p1')).toHaveLength(2)
+  })
+
+  it('各操作は成功・失敗のどちらでも接続を閉じる', async () => {
+    const close = vi.spyOn(IDBDatabase.prototype, 'close')
+    try {
+      const added = await addPhoto('p1', blob('a'), new Date())
+      await listPhotos('p1')
+      if (added.ok) await deletePhoto(added.photo.id)
+      await deleteAllPhotos()
+      expect(close).toHaveBeenCalledTimes(4)
+
+      const original = IDBObjectStore.prototype.put
+      IDBObjectStore.prototype.put = function () {
+        throw new DOMException('full', 'QuotaExceededError')
+      } as typeof original
+      try {
+        await addPhoto('p1', blob('a'), new Date())
+      } finally {
+        IDBObjectStore.prototype.put = original
+      }
+      expect(close).toHaveBeenCalledTimes(5)
+    } finally {
+      close.mockRestore()
+    }
+  })
+})
