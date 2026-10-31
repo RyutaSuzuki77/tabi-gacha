@@ -23,6 +23,17 @@ async function addPhotos(page: Page, n: number) {
 const dialog = (page: Page) => page.getByRole('dialog', { name: '写真の拡大表示' })
 const counter = (page: Page) => dialog(page).getByText(/^\d+ \/ \d+$/)
 
+/**
+ * 仕様8：貼るのは「その旅で撮った写真」であり、警告文も「カメラロールにも残して
+ * おいてください」と既存の写真を前提にしている。capture を付けるとスマホで
+ * カメラが直接起動し、ギャラリーから既存の写真を選べなくなる。
+ */
+test('写真の入力欄は capture を持たない（ギャラリーからも選べる）', async ({ page }) => {
+  const input = page.locator('input[type=file]')
+  await expect(input).toHaveAttribute('accept', 'image/*')
+  expect(await input.getAttribute('capture')).toBeNull()
+})
+
 test('サムネイルをタップするとモーダルが開き、写真が大きく出る', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 800 })
   await addPhotos(page, 1)
