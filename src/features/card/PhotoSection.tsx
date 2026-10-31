@@ -80,7 +80,6 @@ export function PhotoSection({ pullId }: { pullId: string }) {
         ref={inputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         hidden
         onChange={(e) => {
           void handleFile(e.target.files?.[0])
