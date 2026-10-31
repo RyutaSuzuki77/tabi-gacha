@@ -4,13 +4,11 @@ import { KEYS, readJson, writeJson } from './schema'
 export type DemoSettings = {
   unlimited: boolean
   forcedRarity: Rarity | null
-  fakeOrigin: { lat: number; lng: number } | null
 }
 
 export const DEMO_DEFAULTS: DemoSettings = {
   unlimited: false,
   forcedRarity: null,
-  fakeOrigin: null,
 }
 
 export function loadDemo(): DemoSettings {

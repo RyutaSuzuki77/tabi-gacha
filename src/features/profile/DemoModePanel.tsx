@@ -1,12 +1,6 @@
 import type { Rarity } from '../../domain/types'
 import type { DemoSettings } from '../../storage/demoStore'
 
-const ORIGIN_PRESETS: { label: string; lat: number; lng: number }[] = [
-  { label: '東京駅', lat: 35.6812, lng: 139.7671 },
-  { label: '大阪駅', lat: 34.7025, lng: 135.4959 },
-  { label: '博多駅', lat: 33.5897, lng: 130.4207 },
-]
-
 export function DemoModePanel({
   demo,
   onChange,
@@ -47,34 +41,6 @@ export function DemoModePanel({
         </select>
       </label>
 
-      <div className="mt-4 text-sm">
-        <span className="mb-1 block text-xs text-kinari/65">出発地を擬装する</span>
-        <div className="flex flex-wrap gap-2">
-          <button
-            onClick={() => onChange({ ...demo, fakeOrigin: null })}
-            className={`min-h-11 rounded-full px-4 py-3 text-xs ${
-              demo.fakeOrigin === null ? 'bg-ssr text-sumi' : 'border-2 border-ssr/40 text-kinari/80'
-            }`}
-          >
-            擬装しない
-          </button>
-          {ORIGIN_PRESETS.map((preset) => {
-            const active =
-              demo.fakeOrigin?.lat === preset.lat && demo.fakeOrigin?.lng === preset.lng
-            return (
-              <button
-                key={preset.label}
-                onClick={() => onChange({ ...demo, fakeOrigin: { lat: preset.lat, lng: preset.lng } })}
-                className={`min-h-11 rounded-full px-4 py-3 text-xs ${
-                  active ? 'bg-ssr text-sumi' : 'border-2 border-ssr/40 text-kinari/80'
-                }`}
-              >
-                {preset.label}
-              </button>
-            )
-          })}
-        </div>
-      </div>
     </section>
   )
 }

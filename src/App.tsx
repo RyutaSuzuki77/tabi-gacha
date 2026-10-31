@@ -19,8 +19,7 @@ export default function App() {
     setTab(next)
   }
 
-  const demoActive =
-    game.demo.unlimited || game.demo.forcedRarity !== null || game.demo.fakeOrigin !== null
+  const demoActive = game.demo.unlimited || game.demo.forcedRarity !== null
 
   // チェックの変更を反映した最新の pull を表示する（selectedPull は古いスナップショット）
   const current = selectedPull
@@ -66,7 +65,6 @@ export default function App() {
               pull={current}
               town={currentTown}
               generics={game.generics}
-              fakeOrigin={game.demo.fakeOrigin}
               onToggle={(index, done) => game.toggleMission(current.id, index, done)}
               onBack={() => setSelectedPull(null)}
             />

@@ -15,13 +15,6 @@ async function expectNoForbidden(page: Page) {
   expect(text).not.toMatch(FORBIDDEN)
 }
 
-async function openDetailWithOriginPrompt(page: Page) {
-  await gotoHome(page)
-  await drawOne(page)
-  await page.getByRole('button', { name: '出発地を設定する' }).click()
-  await expect(page.getByText('現在地を使わせてもらえますか')).toBeVisible()
-}
-
 test.describe('禁止表現（仕様6.4）', () => {
   test('ホーム', async ({ page }) => {
     await gotoHome(page)
@@ -29,17 +22,18 @@ test.describe('禁止表現（仕様6.4）', () => {
     await expectNoForbidden(page)
   })
 
-  test('カード詳細（出発地の設定を開いた状態）', async ({ page }) => {
-    await openDetailWithOriginPrompt(page)
-    // 説明文が実際に描画されていること（空の画面を見て素通りしないため）
-    await expect(page.getByText('現在地がどこかに保存されることはありません', { exact: false })).toBeVisible()
+  test('カード詳細', async ({ page }) => {
+    await gotoHome(page)
+    await drawOne(page)
+    // 画面が実際に描画されていること（空の画面を見て素通りしないため）
+    await expect(page.getByRole('link', { name: 'Googleマップで経路をひらく' })).toBeVisible()
     await expectNoForbidden(page)
   })
 
   test('プロフィール', async ({ page }) => {
     await gotoHome(page)
     await openTab(page, 'profile')
-    await expect(page.getByText('現在地がどこかに保存されることはありません', { exact: false })).toBeVisible()
+    await expect(page.getByText('このアプリは位置情報を取得しません', { exact: false })).toBeVisible()
     await expectNoForbidden(page)
   })
 })
@@ -93,12 +87,9 @@ test.describe('経路ボタン', () => {
     expect(bg).toBe('none')
   })
 
-  test('手入力した出発地と目的地が、エンコードされて href に入る', async ({ page }) => {
+  test('目的地がエンコードされて href に入り、出発地は付かない', async ({ page }) => {
     await gotoHome(page)
     const townName = await drawOne(page)
-    await page.getByRole('button', { name: '出発地を設定する' }).click()
-    await page.getByRole('button', { name: '手で入力する' }).click()
-    await page.getByPlaceholder('例：東京駅').fill('札幌駅')
 
     const href = await page.getByRole('link', { name: 'Googleマップで経路をひらく' }).getAttribute('href')
     expect(href).not.toBeNull()
@@ -106,8 +97,8 @@ test.describe('経路ボタン', () => {
     expect(href!).not.toMatch(/[^\x00-\x7F]/)
     const url = new URL(href!)
     expect(url.origin + url.pathname).toBe('https://www.google.com/maps/dir/')
-    expect(url.searchParams.get('origin')).toBe('札幌駅')
-    expect(url.searchParams.get('origin') && href!.includes(`origin=${encodeURIComponent('札幌駅')}`)).toBe(true)
+    // 仕様6.3：出発地はGoogleマップ側に任せるので origin は付けない
+    expect(url.searchParams.has('origin')).toBe(false)
     const destination = url.searchParams.get('destination')
     expect(destination, 'destination').toBeTruthy()
     expect(destination!.endsWith(townName), `destination「${destination}」が町名「${townName}」で終わる`).toBe(true)

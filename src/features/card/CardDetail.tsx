@@ -10,14 +10,12 @@ export function CardDetail({
   pull,
   town,
   generics,
-  fakeOrigin,
   onToggle,
   onBack,
 }: {
   pull: Pull
   town: Town
   generics: GenericMission[]
-  fakeOrigin: { lat: number; lng: number } | null
   onToggle: (index: number, done: boolean) => void
   onBack: () => void
 }) {
@@ -80,7 +78,7 @@ export function CardDetail({
           <MissionList pull={pull} town={town} generics={generics} onToggle={onToggle} />
         </section>
 
-        <AccessSection town={town} fakeOrigin={fakeOrigin} />
+        <AccessSection town={town} />
 
         <PhotoSection pullId={pull.id} />
       </div>
