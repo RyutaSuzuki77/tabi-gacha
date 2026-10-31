@@ -10,7 +10,6 @@ export function AccessSection({ town }: { town: Town }) {
       <div className="mt-4 space-y-3">
         <a
           href={routeUrl(`${town.prefecture}${town.name}`)}
-          target="_blank"
           rel="noreferrer"
           className="block rounded-full bg-beni px-4 py-4 text-center font-display text-base
                      text-white shadow-[0_5px_0_0_var(--color-beni-dark)] active:translate-y-[2px]
