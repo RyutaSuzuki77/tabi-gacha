@@ -32,7 +32,6 @@ export async function seedDemo(page: Page, demo: Partial<DemoSettings> = {}) {
   const settings: DemoSettings = {
     unlimited: true,
     forcedRarity: null,
-    fakeOrigin: null,
     ...demo,
   }
   await seedKeys(page, { [KEYS.demo]: settings })

@@ -113,9 +113,7 @@ const SCREENS: Screen[] = [
     setup: async (page) => {
       await gotoHome(page)
       await drawOne(page)
-      // 出発地の入力欄・写真の削除確認まで出した状態で測る
-      await page.getByRole('button', { name: '出発地を設定する' }).click()
-      await page.getByRole('button', { name: '手で入力する' }).click()
+      // 写真の削除確認まで出した状態で測る
       await page.locator('input[type=file]').setInputFiles(pngFile('a.png', 16, [200, 30, 30]))
       await expect(page.locator('section img')).toHaveCount(1)
       await page.getByRole('button', { name: 'この写真を削除する' }).click()
